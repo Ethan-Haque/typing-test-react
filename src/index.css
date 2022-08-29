@@ -1,3 +1,9 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
+@layer base {
+    body {
+      @apply font-['Roboto_Mono',monospace];
+    }
+  }
