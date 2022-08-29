@@ -1,4 +1,3 @@
-import Home from "./components/Home";
 import TypingTest from "./components/TypingTest";
 
 function App() {
