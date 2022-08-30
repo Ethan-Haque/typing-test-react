@@ -4,11 +4,14 @@ import useKeyPress from "../hooks/useKeyPress";
 function TypingTest() {
   const [words, setWords] = useState("begin");
   const [testStart, setTestStart] = useState(false);
-  const [time, setTime] = React.useState(30000);
+  const milliseconds = 30000;
+  const [time, setTime] = React.useState(milliseconds);
   const [timerOn, setTimerOn] = React.useState(false);
   const [endMessage, setEndMessage] = useState("");
   const [accuracy, setAccuracy] = useState((100).toFixed(2));
   const [keystrokes, setKeystrokes] = useState(0);
+  const [wordCount, setWordCount] = useState(0);
+  const [wpm, setWpm] = useState(0);
 
   // padding to center text
   const [leftPadding, setLeftPadding] = useState("    ");
@@ -47,7 +50,6 @@ function TypingTest() {
   if (timerOn && time <= 0) {
     clearVariables();
     setEndMessage("Ran out of time. Press CTRL + R to try again.");
-    setTimerOn(false);
   }
 
   useKeyPress((key) => {
@@ -64,6 +66,13 @@ function TypingTest() {
         setRightPadding(rightPadding + " "); //add right padding
       }
 
+      // calculate wpm
+      if (incomingChars.charAt(0) === " ") {
+        setWordCount(wordCount + 1);
+        const durationInMinutes = (milliseconds - time) / 60000.0;
+        setWpm(((wordCount + 1) / durationInMinutes).toFixed(2));
+      }
+
       // update stages
       updatedTypedChars += currentChar; // add current char to typed chars
       setTypedChars(updatedTypedChars);
@@ -72,11 +81,10 @@ function TypingTest() {
       setIncomingChars(updatedIncomingChars);
 
       if (incomingChars.length === 0) {
-        // end of test
         if (testStart) {
+          // test ended
           clearVariables();
           setEndMessage("Nice Job. Press CTRL + R to try again.");
-          setTimerOn(false);
         } else {
           //start test
           setTestStart(true);
@@ -102,6 +110,8 @@ function TypingTest() {
   });
 
   function clearVariables() {
+    setTimerOn(false);
+    setTestStart(false);
     setLeftPadding("");
     setRightPadding("");
     setTypedChars("");
@@ -116,16 +126,18 @@ function TypingTest() {
         <div className=" w-1/4 text-center px-4 leading-loose ">
           <span>
             {/* Timer */}
-            {("0" + Math.floor((time / 1000) % 60)).slice(-2)}s to go
+            Time left: {("0" + Math.floor((time / 1000) % 60)).slice(-2)}s
           </span>
         </div>
-        <div className=" w-1/4 text-center px-4 leading-loose ">WPM</div>
+        <div className=" w-1/4 text-center px-4 leading-loose pt-20 pb-20">
+          WPM: {wpm}
+        </div>
         <div className=" w-1/4 text-center px-4 leading-loose ">
-          {accuracy}%
+          Accuracy: {accuracy}%
         </div>
       </div>
 
-      <div className="flex flex-wrap justify-center items-center gap-4 w-full  text-[calc(10px_+_2vmin)]">
+      <div className="flex flex-wrap justify-center items-center gap-4 w-full text-[calc(10px_+_2vmin)]">
         <p className="whitespace-pre">
           {/* Everything to the left of current char */}
           <span className="text-[#ccd6f6]">
