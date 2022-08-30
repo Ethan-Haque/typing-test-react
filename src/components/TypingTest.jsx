@@ -4,8 +4,9 @@ import useKeyPress from "../hooks/useKeyPress";
 function TypingTest() {
   const [words, setWords] = useState("begin");
   const [testStart, setTestStart] = useState(false);
-  const [time, setTime] = React.useState(60000);
+  const [time, setTime] = React.useState(30000);
   const [timerOn, setTimerOn] = React.useState(false);
+  const [endMessage, setEndMessage] = useState("");
 
   // padding to center text
   const [leftPadding, setLeftPadding] = useState("    ");
@@ -42,7 +43,8 @@ function TypingTest() {
 
   // timeout
   if (timerOn && time <= 0) {
-    alert("failed");
+    clearVariables();
+    setEndMessage("Ran out of time. Press CTRL + R to try again.");
     setTimerOn(false);
   }
 
@@ -66,11 +68,15 @@ function TypingTest() {
       setCurrentChar(incomingChars.charAt(0)); // set current char to next char
       updatedIncomingChars = incomingChars.substring(1); // remove new current char from incoming
       setIncomingChars(updatedIncomingChars);
+
       if (incomingChars.length === 0) {
+        // end of test
         if (testStart) {
-          alert("finished");
+          clearVariables();
+          setEndMessage("Nice Job. Press CTRL + R to try again.");
           setTimerOn(false);
         } else {
+          //start test
           setTestStart(true);
           setTimerOn(true);
           // reset all variables
@@ -83,14 +89,23 @@ function TypingTest() {
       }
     }
   });
+
+  function clearVariables() {
+    setLeftPadding("");
+    setRightPadding("");
+    setTypedChars("");
+    setCurrentChar("");
+    setIncomingChars("");
+  }
+
   return (
-    <div className="flex flex-col justify-center items-center h-screen  text-white  bg-[#0d47a1] gap-4">
-      <div className="flex flex-wrap justify-center items-center gap-4 w-full  text-[2vmin]">
+    <div className="flex flex-col justify-center items-center h-screen  text-white text-[2vmin] bg-[#0d47a1] gap-4">
+      <div className=" text-center px-4 leading-loose ">{endMessage}</div>
+      <div className="flex flex-wrap justify-center items-center gap-4 w-full  ">
         <div className=" w-1/4 text-center px-4 leading-loose ">
           <span>
             {/* Timer */}
-            {("0" + Math.floor((time / 60000) % 60)).slice(-2)}:
-            {("0" + Math.floor((time / 1000) % 60)).slice(-2)}
+            {("0" + Math.floor((time / 1000) % 60)).slice(-2)}s to go
           </span>
         </div>
         <div className=" w-1/4 text-center px-4 leading-loose ">WPM</div>
