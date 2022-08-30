@@ -7,6 +7,8 @@ function TypingTest() {
   const [time, setTime] = React.useState(30000);
   const [timerOn, setTimerOn] = React.useState(false);
   const [endMessage, setEndMessage] = useState("");
+  const [accuracy, setAccuracy] = useState((100).toFixed(2));
+  const [keystrokes, setKeystrokes] = useState(0);
 
   // padding to center text
   const [leftPadding, setLeftPadding] = useState("    ");
@@ -88,6 +90,15 @@ function TypingTest() {
         }
       }
     }
+
+    // log accuracy
+    if (testStart) {
+      const updatedKeystrokes = keystrokes + 1;
+      setKeystrokes(updatedKeystrokes);
+      setAccuracy(
+        ((updatedTypedChars.length * 100) / updatedKeystrokes).toFixed(2)
+      );
+    }
   });
 
   function clearVariables() {
@@ -109,7 +120,9 @@ function TypingTest() {
           </span>
         </div>
         <div className=" w-1/4 text-center px-4 leading-loose ">WPM</div>
-        <div className=" w-1/4 text-center px-4 leading-loose ">Accuracy</div>
+        <div className=" w-1/4 text-center px-4 leading-loose ">
+          {accuracy}%
+        </div>
       </div>
 
       <div className="flex flex-wrap justify-center items-center gap-4 w-full  text-[calc(10px_+_2vmin)]">
