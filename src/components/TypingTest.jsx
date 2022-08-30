@@ -4,6 +4,8 @@ import useKeyPress from "../hooks/useKeyPress";
 function TypingTest() {
   const [words, setWords] = useState("begin");
   const [testStart, setTestStart] = useState(false);
+  const [time, setTime] = React.useState(60000);
+  const [timerOn, setTimerOn] = React.useState(false);
 
   // padding to center text
   const [leftPadding, setLeftPadding] = useState("    ");
@@ -14,7 +16,7 @@ function TypingTest() {
   const [currentChar, setCurrentChar] = useState(words.charAt(0));
   const [incomingChars, setIncomingChars] = useState(words.substring(1));
 
-  // grab words for typing test on launch
+  // grab words for typing test
   useEffect(() => {
     fetch("http://metaphorpsum.com/paragraphs/1/1")
       .then(function (response) {
@@ -24,7 +26,26 @@ function TypingTest() {
         setWords(data);
       });
   }, []);
-  
+
+  // timer logic
+  useEffect(() => {
+    let interval = null;
+    if (timerOn) {
+      interval = setInterval(() => {
+        setTime((prevTime) => prevTime - 10);
+      }, 10);
+    } else if (!timerOn) {
+      clearInterval(interval);
+    }
+    return () => clearInterval(interval);
+  }, [timerOn]);
+
+  // timeout
+  if (timerOn && time <= 0) {
+    alert("failed");
+    setTimerOn(false);
+  }
+
   useKeyPress((key) => {
     // temp vars
     let updatedTypedChars = typedChars;
@@ -36,7 +57,7 @@ function TypingTest() {
         setLeftPadding(leftPadding.substring(1)); // remove left padding
       }
       if (incomingChars.length < 21) {
-        setRightPadding(rightPadding + " ");  //add right padding
+        setRightPadding(rightPadding + " "); //add right padding
       }
 
       // update stages
@@ -48,9 +69,10 @@ function TypingTest() {
       if (incomingChars.length === 0) {
         if (testStart) {
           alert("finished");
+          setTimerOn(false);
         } else {
           setTestStart(true);
-
+          setTimerOn(true);
           // reset all variables
           setLeftPadding(new Array(20).fill(" ").join(""));
           setRightPadding("");
@@ -61,10 +83,21 @@ function TypingTest() {
       }
     }
   });
-
   return (
-    <div name="home" className="w-full h-screen bg-[#0d47a1]">
-      <div className="flex items-center text-[calc(10px_+_2vmin)] text-white justify-center h-screen">
+    <div className="flex flex-col justify-center items-center h-screen  text-white  bg-[#0d47a1] gap-4">
+      <div className="flex flex-wrap justify-center items-center gap-4 w-full  text-[2vmin]">
+        <div className=" w-1/4 text-center px-4 leading-loose ">
+          <span>
+            {/* Timer */}
+            {("0" + Math.floor((time / 60000) % 60)).slice(-2)}:
+            {("0" + Math.floor((time / 1000) % 60)).slice(-2)}
+          </span>
+        </div>
+        <div className=" w-1/4 text-center px-4 leading-loose ">WPM</div>
+        <div className=" w-1/4 text-center px-4 leading-loose ">Accuracy</div>
+      </div>
+
+      <div className="flex flex-wrap justify-center items-center gap-4 w-full  text-[calc(10px_+_2vmin)]">
         <p className="whitespace-pre">
           {/* Everything to the left of current char */}
           <span className="text-[#ccd6f6]">
