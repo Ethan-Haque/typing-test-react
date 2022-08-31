@@ -202,8 +202,8 @@ function TypingTest() {
             onClick={() => setShowMenu(!showMenu)}
           >
             <div>
-              {showMenu === true ? "Show" : null}
-              {showMenu === false ? "Hide" : null}
+              {showMenu === false ? "Show" : null}
+              {showMenu === true ? "Hide" : null}
             </div>
             <div>{showMenu != null ? "Menu" : null}</div>
           </button>
