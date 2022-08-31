@@ -108,7 +108,41 @@ function TypingTest() {
           setIncomingChars(paragraph.substring(1));
         }
       }
+    } else if (!testStart) {
+      // Keyboard Menu
+      if (key === "m") {
+        setShowMenu(!showMenu);
+      } else {
+        if (showMenu) {
+          switch (key) {
+            case "a":
+              setTime(15000);
+              setMilliseconds(15000);
+              break;
+            case "s":
+              setTime(30000);
+              setMilliseconds(30000);
+              break;
+            case "d":
+              setTime(60000);
+              setMilliseconds(60000);
+              break;
+            case "j":
+              setSentenceCount(1);
+              break;
+            case "k":
+              setSentenceCount(2);
+              break;
+            case "l":
+              setSentenceCount(3);
+              break;
+            default:
+              break;
+          }
+        }
+      }
     }
+
     // calculate wpm
     if (testStart && incomingChars.charAt(0) === " ") {
       setWordCount(wordCount + 1);
@@ -143,7 +177,7 @@ function TypingTest() {
           <div>
             {/* Timer Radio */}
             <div className="section">
-              <div>Timer</div>
+              <div className="text-[calc(2vmin-8px)]">Timer</div>
             </div>
             <div className="radio">
               <input
@@ -192,27 +226,32 @@ function TypingTest() {
                 60s
               </label>
             </div>
+            {/* Timer Keys */}
+            <div className="section">
+              <div className="radio_keys">a</div>
+              <div className="w-1/4 radio_keys">s</div>
+              <div className="radio_keys">d</div>
+            </div>
           </div>
         ) : null}
         {/* Menu Button */}
         <div className="w-1/6 text">
           <button
             className={
-              showMenu == null
-                ? "text-[#0d47a1] h-[7rem] pt-11"
-                : "pt-11 h-[7rem]"
+              showMenu == null ? "text-[#0d47a1] h-[7rem] " : " h-[7rem]"
             }
             disabled={showMenu == null ? true : false}
             onClick={() => setShowMenu(!showMenu)}
           >
-            <div>{showMenu != null ? "Menu" : null}</div>
+            <div>Menu</div>
+            <div>m</div>
           </button>
         </div>
         {showMenu ? (
           <div>
             {/* SentenceCount Radio */}
             <div className="section">
-              <div>Sentences</div>
+              <div className="text-[calc(2vmin-8px)]">Sentences</div>
             </div>
             <div className="radio">
               <input
@@ -257,6 +296,12 @@ function TypingTest() {
               <label htmlFor="sentences3" className="radio_label">
                 &nbsp;3&nbsp;
               </label>
+            </div>
+            {/* Sentence Count Keys */}
+            <div className="section">
+              <div className="radio_keys">j</div>
+              <div className="w-1/4 radio_keys">k</div>
+              <div className="radio_keys">l</div>
             </div>
           </div>
         ) : null}
