@@ -75,6 +75,13 @@ function TypingTest() {
       updatedIncomingChars = incomingChars.substring(1); // remove new current char from incoming
       setIncomingChars(updatedIncomingChars);
 
+      // calculate wpm
+      if (testStart && incomingChars.charAt(0) === " ") {
+        setWordCount(wordCount + 1);
+        const durationInMinutes = (milliseconds - time) / 60000.0;
+        setWpm((wordCount / durationInMinutes).toFixed(2));
+      }
+
       //  check for last character
       if (incomingChars.length === 0) {
         // if test already started
@@ -143,12 +150,6 @@ function TypingTest() {
       }
     }
 
-    // calculate wpm
-    if (testStart && incomingChars.charAt(0) === " ") {
-      setWordCount(wordCount + 1);
-      const durationInMinutes = (milliseconds - time) / 60000.0;
-      setWpm((wordCount / durationInMinutes).toFixed(2));
-    }
     // log accuracy
     if (testStart) {
       const updatedKeystrokes = keystrokes + 1;

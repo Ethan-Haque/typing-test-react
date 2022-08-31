@@ -1,4 +1,5 @@
 # React Typing Test (in progress)
+https://ethan-haque.netlify.app/
 
 Simple typing test made in React with Tailwind CSS. 
   * Time, words per minute and accuracy are tracked and displayed.
