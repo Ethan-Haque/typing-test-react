@@ -7,10 +7,10 @@
     @apply font-['Roboto_Mono',monospace];
   }
   .section {
-    @apply flex flex-wrap justify-center items-center gap-4 w-full;
+    @apply flex flex-wrap justify-center items-center gap-1 w-full;
   }
   .text {
-    @apply text-center px-4 leading-loose;
+    @apply text-center leading-loose;
   }
   .radio {
     @apply inline-flex overflow-hidden rounded-[15px] border-solid border-2 border-white;

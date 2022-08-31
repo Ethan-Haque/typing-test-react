@@ -13,6 +13,7 @@ function TypingTest() {
   const [keystrokes, setKeystrokes] = useState(0);
   const [wordCount, setWordCount] = useState(0);
   const [wpm, setWpm] = useState(0);
+  const [showMenu, setShowMenu] = useState(false);
 
   // padding to center text
   const [leftPadding, setLeftPadding] = useState("    ");
@@ -67,13 +68,6 @@ function TypingTest() {
         setRightPadding(rightPadding + " "); //add right padding
       }
 
-      // calculate wpm
-      if (incomingChars.charAt(0) === " ") {
-        setWordCount(wordCount + 1);
-        const durationInMinutes = (milliseconds - time) / 60000.0;
-        setWpm(((wordCount + 1) / durationInMinutes).toFixed(2));
-      }
-
       // update stages
       updatedTypedChars += currentChar; // add current char to typed chars
       setTypedChars(updatedTypedChars);
@@ -81,16 +75,23 @@ function TypingTest() {
       updatedIncomingChars = incomingChars.substring(1); // remove new current char from incoming
       setIncomingChars(updatedIncomingChars);
 
+      //  check for last character
       if (incomingChars.length === 0) {
+        // if test already started
         if (testStart) {
-          // test ended
+          //count last word
+          setWordCount(wordCount + 1);
+          const durationInMinutes = (milliseconds - time) / 60000.0;
+          setWpm(((wordCount + 1) / durationInMinutes).toFixed(2));
+
+          // end
           clearVariables();
           setEndMessage("Nice Job. Press CTRL + R to try again.");
         } else {
           //start test
           setTestStart(true);
           setTimerOn(true);
-
+          setShowMenu(null);
           // set words to option size
           let sentences = words.match(/[^.!?]+[.!?]+/g);
           let paragraph = "";
@@ -108,7 +109,12 @@ function TypingTest() {
         }
       }
     }
-
+    // calculate wpm
+    if (testStart && incomingChars.charAt(0) === " ") {
+      setWordCount(wordCount + 1);
+      const durationInMinutes = (milliseconds - time) / 60000.0;
+      setWpm(((wordCount + 1) / durationInMinutes).toFixed(2));
+    }
     // log accuracy
     if (testStart) {
       const updatedKeystrokes = keystrokes + 1;
@@ -131,107 +137,133 @@ function TypingTest() {
 
   return (
     <div className="flex flex-col justify-around items-center h-screen  text-white text-[2vmin] bg-[#0d47a1] gap-4">
-      {/* Options */}
-      <div className="section">
-        <div className="text">{endMessage}</div>
-        <div className="radio">
-          <input
-            type="radio"
-            name="time"
-            value="15"
-            id="time1"
-            className="radio_input"
-            checked={milliseconds === 15000}
-            onChange={(e) => {
-              setTime(e.target.value * 1000);
-              setMilliseconds(e.target.value * 1000);
-            }}
-          />
-          <label htmlFor="time1" className="radio_label">
-            15s
-          </label>
-          <input
-            type="radio"
-            name="time"
-            value="30"
-            id="time2"
-            className="radio_input"
-            checked={milliseconds === 30000}
-            onChange={(e) => {
-              setTime(e.target.value * 1000);
-              setMilliseconds(e.target.value * 1000);
-            }}
-          />
-          <label htmlFor="time2" className="radio_label">
-            30s
-          </label>
-          <input
-            type="radio"
-            name="time"
-            value="60"
-            id="time3"
-            className="radio_input"
-            checked={milliseconds === 60000}
-            onChange={(e) => {
-              setTime(e.target.value * 1000);
-              setMilliseconds(e.target.value * 1000);
-            }}
-          />
-          <label htmlFor="time3" className="radio_label">
-            60s
-          </label>
+      {/* Menu */}
+      <div className="section text-white text-[calc(5px_+_2vmin)]">
+        {showMenu ? (
+          <div>
+            <div className="section">
+              <div>Timer</div>
+            </div>
+            <div className="radio">
+              <input
+                type="radio"
+                name="time"
+                value="15"
+                id="time1"
+                className="radio_input"
+                checked={milliseconds === 15000}
+                onChange={(e) => {
+                  setTime(e.target.value * 1000);
+                  setMilliseconds(e.target.value * 1000);
+                }}
+              />
+              <label htmlFor="time1" className="radio_label">
+                15s
+              </label>
+              <input
+                type="radio"
+                name="time"
+                value="30"
+                id="time2"
+                className="radio_input"
+                checked={milliseconds === 30000}
+                onChange={(e) => {
+                  setTime(e.target.value * 1000);
+                  setMilliseconds(e.target.value * 1000);
+                }}
+              />
+              <label htmlFor="time2" className="radio_label">
+                30s
+              </label>
+              <input
+                type="radio"
+                name="time"
+                value="60"
+                id="time3"
+                className="radio_input"
+                checked={milliseconds === 60000}
+                onChange={(e) => {
+                  setTime(e.target.value * 1000);
+                  setMilliseconds(e.target.value * 1000);
+                }}
+              />
+              <label htmlFor="time3" className="radio_label">
+                60s
+              </label>
+            </div>
+          </div>
+        ) : null}
+        <div className="w-1/6 text">
+          <button
+            className={
+              showMenu == null ? "text-[#0d47a1] h-[7rem]" : "h-[7rem]"
+            }
+            disabled={showMenu == null ? true : false}
+            onClick={() => setShowMenu(!showMenu)}
+          >
+            <div>
+              {showMenu === true ? "Show" : null}
+              {showMenu === false ? "Hide" : null}
+            </div>
+            <div>{showMenu != null ? "Menu" : null}</div>
+          </button>
         </div>
-        <div className="w-1/4 text">Show Options</div>
-        <div className="radio">
-          <input
-            type="radio"
-            name="sentenceCount"
-            value="1"
-            id="sentences1"
-            className="radio_input"
-            checked={sentenceCount == 1}
-            onChange={(e) => {
-              setSentenceCount(e.target.value);
-            }}
-          />
-          <label htmlFor="sentences1" className="radio_label">
-            &nbsp;1&nbsp;
-          </label>
-          <input
-            type="radio"
-            name="sentenceCount"
-            value="2"
-            id="sentences2"
-            className="radio_input"
-            checked={sentenceCount == 2}
-            onChange={(e) => {
-              setSentenceCount(e.target.value);
-            }}
-          />
-          <label htmlFor="sentences2" className="radio_label">
-            &nbsp;2&nbsp;
-          </label>
-          <input
-            type="radio"
-            name="sentenceCount"
-            value="3"
-            id="sentences3"
-            className="radio_input"
-            checked={sentenceCount == 3}
-            onChange={(e) => {
-              setSentenceCount(e.target.value);
-              console.log(e.target.value);
-              console.log(sentenceCount);
-            }}
-          />
-          <label htmlFor="sentences3" className="radio_label">
-            &nbsp;3&nbsp;
-          </label>
-        </div>
+        {showMenu ? (
+          <div>
+            <div className="section">
+              <div>Sentences</div>
+            </div>
+            <div className="radio">
+              <input
+                type="radio"
+                name="sentenceCount"
+                value="1"
+                id="sentences1"
+                className="radio_input"
+                checked={sentenceCount == 1}
+                onChange={(e) => {
+                  setSentenceCount(e.target.value);
+                }}
+              />
+              <label htmlFor="sentences1" className="radio_label">
+                &nbsp;1&nbsp;
+              </label>
+              <input
+                type="radio"
+                name="sentenceCount"
+                value="2"
+                id="sentences2"
+                className="radio_input"
+                checked={sentenceCount == 2}
+                onChange={(e) => {
+                  setSentenceCount(e.target.value);
+                }}
+              />
+              <label htmlFor="sentences2" className="radio_label">
+                &nbsp;2&nbsp;
+              </label>
+              <input
+                type="radio"
+                name="sentenceCount"
+                value="3"
+                id="sentences3"
+                className="radio_input"
+                checked={sentenceCount == 3}
+                onChange={(e) => {
+                  setSentenceCount(e.target.value);
+                }}
+              />
+              <label htmlFor="sentences3" className="radio_label">
+                &nbsp;3&nbsp;
+              </label>
+            </div>
+          </div>
+        ) : null}
       </div>
 
       {/* Typing Test */}
-      <div className="section text-[calc(10px_+_2vmin)]">
+      <div className="section text-[calc(20px_+_2vmin)] absolute">
+        <div>{endMessage}</div>
         <p className="whitespace-pre">
           {/* Everything to the left of current char */}
           <span className="text-[#ccd6f6]">
@@ -245,8 +277,8 @@ function TypingTest() {
       </div>
 
       {/* Stats */}
-      <div className="section">
-        <div className="w-1/4 text">
+      <div className="section text-[calc(2px_+_2vmin)]">
+        <div className="w-1/3 text">
           <span>
             {/* Timer */}
             Time left: {("0" + Math.floor((time / 60000) % 60)).slice(-1)}:
@@ -254,7 +286,7 @@ function TypingTest() {
           </span>
         </div>
         <div className="w-1/4 text ">WPM: {wpm}</div>
-        <div className="w-1/4 text">Accuracy: {accuracy}%</div>
+        <div className="w-1/3 text">Accuracy: {accuracy}%</div>
       </div>
     </div>
   );
