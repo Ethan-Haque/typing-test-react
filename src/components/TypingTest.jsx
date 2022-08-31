@@ -177,7 +177,7 @@ function TypingTest() {
           <div>
             {/* Timer Radio */}
             <div className="section">
-              <div className="text-[calc(2vmin-8px)]">Timer</div>
+              <div className="text-[calc(1vmin_+_16px)]">Timer</div>
             </div>
             <div className="radio">
               <input
@@ -251,7 +251,7 @@ function TypingTest() {
           <div>
             {/* SentenceCount Radio */}
             <div className="section">
-              <div className="text-[calc(2vmin-8px)]">Sentences</div>
+              <div className="text-[calc(1vmin_+_16px)]">Sentences</div>
             </div>
             <div className="radio">
               <input
