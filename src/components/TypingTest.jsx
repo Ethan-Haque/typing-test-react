@@ -2,9 +2,10 @@ import React, { useState, useEffect } from "react";
 import useKeyPress from "../hooks/useKeyPress";
 
 function TypingTest() {
+  const [milliseconds, setMilliseconds] = useState(30000);
+  const [sentenceCount, setSentenceCount] = useState(1);
   const [words, setWords] = useState("begin");
   const [testStart, setTestStart] = useState(false);
-  const milliseconds = 30000;
   const [time, setTime] = React.useState(milliseconds);
   const [timerOn, setTimerOn] = React.useState(false);
   const [endMessage, setEndMessage] = useState("");
@@ -24,7 +25,7 @@ function TypingTest() {
 
   // grab words for typing test
   useEffect(() => {
-    fetch("http://metaphorpsum.com/paragraphs/1/1")
+    fetch("http://metaphorpsum.com/paragraphs/1/6")
       .then(function (response) {
         return response.text();
       })
@@ -89,12 +90,21 @@ function TypingTest() {
           //start test
           setTestStart(true);
           setTimerOn(true);
+
+          // set words to option size
+          let sentences = words.match(/[^.!?]+[.!?]+/g);
+          let paragraph = "";
+          for (var i = 0; i < sentenceCount; i++) {
+            paragraph = paragraph + sentences[i];
+          }
+          setWords(paragraph);
+
           // reset all variables
           setLeftPadding(new Array(20).fill(" ").join(""));
           setRightPadding("");
           setTypedChars("");
-          setCurrentChar(words.charAt(0));
-          setIncomingChars(words.substring(1));
+          setCurrentChar(paragraph.charAt(0));
+          setIncomingChars(paragraph.substring(1));
         }
       }
     }
@@ -120,24 +130,108 @@ function TypingTest() {
   }
 
   return (
-    <div className="flex flex-col justify-center items-center h-screen  text-white text-[2vmin] bg-[#0d47a1] gap-4">
-      <div className=" text-center px-4 leading-loose ">{endMessage}</div>
-      <div className="flex flex-wrap justify-center items-center gap-4 w-full  ">
-        <div className=" w-1/4 text-center px-4 leading-loose ">
-          <span>
-            {/* Timer */}
-            Time left: {("0" + Math.floor((time / 1000) % 60)).slice(-2)}s
-          </span>
+    <div className="flex flex-col justify-around items-center h-screen  text-white text-[2vmin] bg-[#0d47a1] gap-4">
+      {/* Options */}
+      <div className="section">
+        <div className="text">{endMessage}</div>
+        <div className="radio">
+          <input
+            type="radio"
+            name="time"
+            value="15"
+            id="time1"
+            className="radio_input"
+            checked={milliseconds === 15000}
+            onChange={(e) => {
+              setTime(e.target.value * 1000);
+              setMilliseconds(e.target.value * 1000);
+            }}
+          />
+          <label htmlFor="time1" className="radio_label">
+            15s
+          </label>
+          <input
+            type="radio"
+            name="time"
+            value="30"
+            id="time2"
+            className="radio_input"
+            checked={milliseconds === 30000}
+            onChange={(e) => {
+              setTime(e.target.value * 1000);
+              setMilliseconds(e.target.value * 1000);
+            }}
+          />
+          <label htmlFor="time2" className="radio_label">
+            30s
+          </label>
+          <input
+            type="radio"
+            name="time"
+            value="60"
+            id="time3"
+            className="radio_input"
+            checked={milliseconds === 60000}
+            onChange={(e) => {
+              setTime(e.target.value * 1000);
+              setMilliseconds(e.target.value * 1000);
+            }}
+          />
+          <label htmlFor="time3" className="radio_label">
+            60s
+          </label>
         </div>
-        <div className=" w-1/4 text-center px-4 leading-loose pt-20 pb-20">
-          WPM: {wpm}
-        </div>
-        <div className=" w-1/4 text-center px-4 leading-loose ">
-          Accuracy: {accuracy}%
+        <div className="w-1/4 text">Show Options</div>
+        <div className="radio">
+          <input
+            type="radio"
+            name="sentenceCount"
+            value="1"
+            id="sentences1"
+            className="radio_input"
+            checked={sentenceCount == 1}
+            onChange={(e) => {
+              setSentenceCount(e.target.value);
+            }}
+          />
+          <label htmlFor="sentences1" className="radio_label">
+            &nbsp;1&nbsp;
+          </label>
+          <input
+            type="radio"
+            name="sentenceCount"
+            value="2"
+            id="sentences2"
+            className="radio_input"
+            checked={sentenceCount == 2}
+            onChange={(e) => {
+              setSentenceCount(e.target.value);
+            }}
+          />
+          <label htmlFor="sentences2" className="radio_label">
+            &nbsp;2&nbsp;
+          </label>
+          <input
+            type="radio"
+            name="sentenceCount"
+            value="3"
+            id="sentences3"
+            className="radio_input"
+            checked={sentenceCount == 3}
+            onChange={(e) => {
+              setSentenceCount(e.target.value);
+              console.log(e.target.value);
+              console.log(sentenceCount);
+            }}
+          />
+          <label htmlFor="sentences3" className="radio_label">
+            &nbsp;3&nbsp;
+          </label>
         </div>
       </div>
 
-      <div className="flex flex-wrap justify-center items-center gap-4 w-full text-[calc(10px_+_2vmin)]">
+      {/* Typing Test */}
+      <div className="section text-[calc(10px_+_2vmin)]">
         <p className="whitespace-pre">
           {/* Everything to the left of current char */}
           <span className="text-[#ccd6f6]">
@@ -148,6 +242,19 @@ function TypingTest() {
           {/* Everything to the right of current char */}
           <span>{incomingChars.substring(0, 20) + rightPadding}</span>
         </p>
+      </div>
+
+      {/* Stats */}
+      <div className="section">
+        <div className="w-1/4 text">
+          <span>
+            {/* Timer */}
+            Time left: {("0" + Math.floor((time / 60000) % 60)).slice(-1)}:
+            {("0" + Math.floor((time / 1000) % 60)).slice(-2)}s
+          </span>
+        </div>
+        <div className="w-1/4 text ">WPM: {wpm}</div>
+        <div className="w-1/4 text">Accuracy: {accuracy}%</div>
       </div>
     </div>
   );

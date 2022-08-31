@@ -1,9 +1,27 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-@import url('https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=Roboto+Mono&display=swap");
 @layer base {
-    body {
-      @apply font-['Roboto_Mono',monospace];
-    }
+  body {
+    @apply font-['Roboto_Mono',monospace];
   }
+  .section {
+    @apply flex flex-wrap justify-center items-center gap-4 w-full;
+  }
+  .text {
+    @apply text-center px-4 leading-loose;
+  }
+  .radio {
+    @apply inline-flex overflow-hidden rounded-[15px] border-solid border-2 border-white;
+  }
+  .radio_label {
+    @apply pl-[8px] pr-[14px]  cursor-pointer	transition-[background];
+  }
+  .radio_input {
+    @apply hidden;
+  }
+  .radio_input:checked + .radio_label {
+    @apply bg-[#08357a];
+  }
+}
