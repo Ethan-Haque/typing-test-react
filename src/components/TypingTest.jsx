@@ -2,18 +2,24 @@ import React, { useState, useEffect } from "react";
 import useKeyPress from "../hooks/useKeyPress";
 
 function TypingTest() {
-  const [milliseconds, setMilliseconds] = useState(30000);
-  const [sentenceCount, setSentenceCount] = useState(1);
-  const [words, setWords] = useState("begin");
+  const [showMenu, setShowMenu] = useState(false);
+  const [endMessage, setEndMessage] = useState("");
   const [testStart, setTestStart] = useState(false);
+
+  // words
+  const [words, setWords] = useState("begin");
+  const [wordCount, setWordCount] = useState(0);
+  const [sentenceCount, setSentenceCount] = useState(1);
+
+  // time
+  const [milliseconds, setMilliseconds] = useState(30000);
   const [time, setTime] = React.useState(milliseconds);
   const [timerOn, setTimerOn] = React.useState(false);
-  const [endMessage, setEndMessage] = useState("");
-  const [accuracy, setAccuracy] = useState((100).toFixed(2));
+
+  // stats
   const [keystrokes, setKeystrokes] = useState(0);
-  const [wordCount, setWordCount] = useState(0);
+  const [accuracy, setAccuracy] = useState((100).toFixed(2));
   const [wpm, setWpm] = useState((0).toFixed(2));
-  const [showMenu, setShowMenu] = useState(false);
 
   // padding to center text
   const [leftPadding, setLeftPadding] = useState("    ");
@@ -33,6 +39,15 @@ function TypingTest() {
       .then(function (data) {
         setWords(data);
       });
+
+    const storedMilliseconds = localStorage.getItem('milliseconds');
+    const storedSentenceCount = localStorage.getItem('sentenceCount');
+    if (storedMilliseconds) {
+      setMilliseconds(JSON.parse(storedMilliseconds));
+    }
+    if (storedSentenceCount) {
+      setSentenceCount(JSON.parse(storedSentenceCount));
+    }
   }, []);
 
   // timer logic
@@ -96,6 +111,8 @@ function TypingTest() {
           setEndMessage("Nice Job. Press CTRL + R to try again.");
         } else {
           //start test
+          localStorage.setItem('milliseconds', milliseconds);
+          localStorage.setItem('sentenceCount', sentenceCount);
           setTestStart(true);
           setTimerOn(true);
           setShowMenu(null);
