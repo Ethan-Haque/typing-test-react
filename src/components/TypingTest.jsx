@@ -191,67 +191,67 @@ function TypingTest() {
     <div className="flex flex-col justify-around items-center h-screen  text-white text-[2vmin] bg-[#0d47a1] gap-4">
       {/* Menu */}
       <div className="section text-white text-[calc(5px_+_2vmin)]">
-        {showMenu ? (
-          <div>
-            {/* Timer Radio */}
-            <div className="section">
-              <div className="text-[calc(1vmin_+_16px)]">Timer</div>
-            </div>
-            <div className="radio">
-              <input
-                type="radio"
-                name="time"
-                value="15"
-                id="time1"
-                className="radio_input"
-                checked={milliseconds === 15000}
-                onChange={(e) => {
-                  setTime(e.target.value * 1000);
-                  setMilliseconds(e.target.value * 1000);
-                }}
-              />
-              <label htmlFor="time1" className="radio_label">
-                15s
-              </label>
-              <input
-                type="radio"
-                name="time"
-                value="30"
-                id="time2"
-                className="radio_input"
-                checked={milliseconds === 30000}
-                onChange={(e) => {
-                  setTime(e.target.value * 1000);
-                  setMilliseconds(e.target.value * 1000);
-                }}
-              />
-              <label htmlFor="time2" className="radio_label">
-                30s
-              </label>
-              <input
-                type="radio"
-                name="time"
-                value="60"
-                id="time3"
-                className="radio_input"
-                checked={milliseconds === 60000}
-                onChange={(e) => {
-                  setTime(e.target.value * 1000);
-                  setMilliseconds(e.target.value * 1000);
-                }}
-              />
-              <label htmlFor="time3" className="radio_label">
-                60s
-              </label>
-            </div>
-            {/* Timer Keys */}
-            <div className="section">
-              <div className="radio_keys">a</div>
-              <div className="w-1/4 radio_keys">s</div>
-              <div className="radio_keys">d</div>
-            </div>
+        <div className={
+          showMenu === true ? "opacity-100" : "opacity-0"
+        }>
+          {/* Timer Radio */}
+          <div className="section">
+            <div className="text-[calc(1vmin_+_16px)]">Timer</div>
           </div>
-        ) : null}
+          <div className="radio">
+            <input
+              type="radio"
+              name="time"
+              value="15"
+              id="time1"
+              className="radio_input"
+              checked={milliseconds === 15000}
+              onChange={(e) => {
+                setTime(e.target.value * 1000);
+                setMilliseconds(e.target.value * 1000);
+              }}
+            />
+            <label htmlFor="time1" className="radio_label">
+              15s
+            </label>
+            <input
+              type="radio"
+              name="time"
+              value="30"
+              id="time2"
+              className="radio_input"
+              checked={milliseconds === 30000}
+              onChange={(e) => {
+                setTime(e.target.value * 1000);
+                setMilliseconds(e.target.value * 1000);
+              }}
+            />
+            <label htmlFor="time2" className="radio_label">
+              30s
+            </label>
+            <input
+              type="radio"
+              name="time"
+              value="60"
+              id="time3"
+              className="radio_input"
+              checked={milliseconds === 60000}
+              onChange={(e) => {
+                setTime(e.target.value * 1000);
+                setMilliseconds(e.target.value * 1000);
+              }}
+            />
+            <label htmlFor="time3" className="radio_label">
+              60s
+            </label>
+          </div>
+          {/* Timer Keys */}
+          <div className="section">
+            <div className="radio_keys">a</div>
+            <div className="w-1/4 radio_keys">s</div>
+            <div className="radio_keys">d</div>
+          </div>
+        </div>
         {/* Menu Button */}
         <div className="w-1/6 text">
           <button
@@ -265,64 +265,65 @@ function TypingTest() {
             <div>m</div>
           </button>
         </div>
-        {showMenu ? (
-          <div>
-            {/* SentenceCount Radio */}
-            <div className="section">
-              <div className="text-[calc(1vmin_+_16px)]">Sentences</div>
-            </div>
-            <div className="radio">
-              <input
-                type="radio"
-                name="sentenceCount"
-                value="1"
-                id="sentences1"
-                className="radio_input"
-                checked={sentenceCount == 1}
-                onChange={(e) => {
-                  setSentenceCount(e.target.value);
-                }}
-              />
-              <label htmlFor="sentences1" className="radio_label">
-                &nbsp;1&nbsp;
-              </label>
-              <input
-                type="radio"
-                name="sentenceCount"
-                value="2"
-                id="sentences2"
-                className="radio_input"
-                checked={sentenceCount == 2}
-                onChange={(e) => {
-                  setSentenceCount(e.target.value);
-                }}
-              />
-              <label htmlFor="sentences2" className="radio_label">
-                &nbsp;2&nbsp;
-              </label>
-              <input
-                type="radio"
-                name="sentenceCount"
-                value="3"
-                id="sentences3"
-                className="radio_input"
-                checked={sentenceCount == 3}
-                onChange={(e) => {
-                  setSentenceCount(e.target.value);
-                }}
-              />
-              <label htmlFor="sentences3" className="radio_label">
-                &nbsp;3&nbsp;
-              </label>
-            </div>
-            {/* Sentence Count Keys */}
-            <div className="section">
-              <div className="radio_keys">j</div>
-              <div className="w-1/4 radio_keys">k</div>
-              <div className="radio_keys">l</div>
-            </div>
+
+        <div className={
+          showMenu === true ? "opacity-100" : "opacity-0"
+        }>
+          {/* SentenceCount Radio */}
+          <div className="section">
+            <div className="text-[calc(1vmin_+_16px)]">Sentences</div>
           </div>
-        ) : null}
+          <div className="radio">
+            <input
+              type="radio"
+              name="sentenceCount"
+              value="1"
+              id="sentences1"
+              className="radio_input"
+              checked={sentenceCount == 1}
+              onChange={(e) => {
+                setSentenceCount(e.target.value);
+              }}
+            />
+            <label htmlFor="sentences1" className="radio_label">
+              &nbsp;1&nbsp;
+            </label>
+            <input
+              type="radio"
+              name="sentenceCount"
+              value="2"
+              id="sentences2"
+              className="radio_input"
+              checked={sentenceCount == 2}
+              onChange={(e) => {
+                setSentenceCount(e.target.value);
+              }}
+            />
+            <label htmlFor="sentences2" className="radio_label">
+              &nbsp;2&nbsp;
+            </label>
+            <input
+              type="radio"
+              name="sentenceCount"
+              value="3"
+              id="sentences3"
+              className="radio_input"
+              checked={sentenceCount == 3}
+              onChange={(e) => {
+                setSentenceCount(e.target.value);
+              }}
+            />
+            <label htmlFor="sentences3" className="radio_label">
+              &nbsp;3&nbsp;
+            </label>
+          </div>
+          {/* Sentence Count Keys */}
+          <div className="section">
+            <div className="radio_keys">j</div>
+            <div className="w-1/4 radio_keys">k</div>
+            <div className="radio_keys">l</div>
+          </div>
+        </div>
       </div>
 
       {/* Typing Test */}
@@ -341,7 +342,7 @@ function TypingTest() {
       </div>
 
       {/* Stats */}
-      <div className="section text-[calc(2px_+_2vmin)]">
+      <div className="section text-[calc(6px_+_2vmin)]">
         <div className="w-1/3 text">
           <span>
             {/* Timer */}
