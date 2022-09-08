@@ -95,80 +95,81 @@ function TypingTest() {
       if (testStart && key === " ") {
         setWpm(((wordCount + 1) / ((milliseconds - time) / 60000.0)).toFixed(2));
         setWordCount(wordCount + 1);
+      }
 
-        //  check for last character
-        if (incomingChars.length === 0) {
-          // if test already started
-          if (testStart) {
-            //count last word
-            setWpm(((wordCount + 1) / ((milliseconds - time) / 60000.0)).toFixed(2));
-            setWordCount(wordCount + 1);
+      //  check for last character
+      if (incomingChars.length === 0) {
+        // if test already started
+        if (testStart) {
+          //count last word
+          setWpm(((wordCount + 1) / ((milliseconds - time) / 60000.0)).toFixed(2));
+          setWordCount(wordCount + 1);
 
-            // end
-            clearVariables();
-            setEndMessage("Nice Job. Press CTRL + R to try again.");
-          } else {
-            //start test
-            setTestStart(true);
-            setTimerOn(true);
-            setShowMenu(null);
-            // set words to option size
-            let sentences = words.match(/[^.!?]+[.!?]+/g);
-            let paragraph = "";
-            for (var i = 0; i < sentenceCount; i++) {
-              paragraph = paragraph + sentences[i];
-            }
-            setWords(paragraph);
-
-            // reset all variables
-            setLeftPadding(new Array(20).fill(" ").join(""));
-            setRightPadding("");
-            setTypedChars("");
-            setCurrentChar(paragraph.charAt(0));
-            setIncomingChars(paragraph.substring(1));
-          }
-        }
-      } else if (!testStart) {
-        // Keyboard Menu
-        if (key === "m") {
-          setShowMenu(!showMenu);
+          // end
+          clearVariables();
+          setEndMessage("Nice Job. Press CTRL + R to try again.");
         } else {
-          if (showMenu) {
-            switch (key) {
-              case "a":
-                changeTime(15000);
-                break;
-              case "s":
-                changeTime(30000);
-                break;
-              case "d":
-                changeTime(60000);
-                break;
-              case "j":
-                changeSentenceCount(1);
-                break;
-              case "k":
-                changeSentenceCount(2);
-                break;
-              case "l":
-                changeSentenceCount(3);
-                break;
-              default:
-                break;
-            }
+          //start test
+          setTestStart(true);
+          setTimerOn(true);
+          setShowMenu(null);
+          // set words to option size
+          let sentences = words.match(/[^.!?]+[.!?]+/g);
+          let paragraph = "";
+          for (var i = 0; i < sentenceCount; i++) {
+            paragraph = paragraph + sentences[i];
+          }
+          setWords(paragraph);
+
+          // reset all variables
+          setLeftPadding(new Array(20).fill(" ").join(""));
+          setRightPadding("");
+          setTypedChars("");
+          setCurrentChar(paragraph.charAt(0));
+          setIncomingChars(paragraph.substring(1));
+        }
+      }
+    } else if (!testStart) {
+      // Keyboard Menu
+      if (key === "m") {
+        setShowMenu(!showMenu);
+      } else {
+        if (showMenu) {
+          switch (key) {
+            case "a":
+              changeTime(15000);
+              break;
+            case "s":
+              changeTime(30000);
+              break;
+            case "d":
+              changeTime(60000);
+              break;
+            case "j":
+              changeSentenceCount(1);
+              break;
+            case "k":
+              changeSentenceCount(2);
+              break;
+            case "l":
+              changeSentenceCount(3);
+              break;
+            default:
+              break;
           }
         }
       }
+    }
 
-      // log accuracy
-      if (testStart) {
-        const updatedKeystrokes = keystrokes + 1;
-        setKeystrokes(updatedKeystrokes);
-        setAccuracy(
-          ((updatedTypedChars.length * 100) / updatedKeystrokes).toFixed(2)
-        );
-      }
-    });
+    // log accuracy
+    if (testStart) {
+      const updatedKeystrokes = keystrokes + 1;
+      setKeystrokes(updatedKeystrokes);
+      setAccuracy(
+        ((updatedTypedChars.length * 100) / updatedKeystrokes).toFixed(2)
+      );
+    }
+  });
 
   // reset all vars
   function clearVariables() {
