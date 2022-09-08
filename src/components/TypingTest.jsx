@@ -44,6 +44,7 @@ function TypingTest() {
     const storedSentenceCount = localStorage.getItem('sentenceCount');
     if (storedMilliseconds) {
       setMilliseconds(JSON.parse(storedMilliseconds));
+      setTime(JSON.parse(storedMilliseconds));
     }
     if (storedSentenceCount) {
       setSentenceCount(JSON.parse(storedSentenceCount));
@@ -111,8 +112,6 @@ function TypingTest() {
           setEndMessage("Nice Job. Press CTRL + R to try again.");
         } else {
           //start test
-          localStorage.setItem('milliseconds', milliseconds);
-          localStorage.setItem('sentenceCount', sentenceCount);
           setTestStart(true);
           setTimerOn(true);
           setShowMenu(null);
@@ -140,25 +139,22 @@ function TypingTest() {
         if (showMenu) {
           switch (key) {
             case "a":
-              setTime(15000);
-              setMilliseconds(15000);
+              changeTime(15000);
               break;
             case "s":
-              setTime(30000);
-              setMilliseconds(30000);
+              changeTime(30000);
               break;
             case "d":
-              setTime(60000);
-              setMilliseconds(60000);
+              changeTime(60000);
               break;
             case "j":
-              setSentenceCount(1);
+              changeSentenceCount(1);
               break;
             case "k":
-              setSentenceCount(2);
+              changeSentenceCount(2);
               break;
             case "l":
-              setSentenceCount(3);
+              changeSentenceCount(3);
               break;
             default:
               break;
@@ -177,6 +173,7 @@ function TypingTest() {
     }
   });
 
+  // reset all vars
   function clearVariables() {
     setTimerOn(false);
     setTestStart(false);
@@ -185,6 +182,21 @@ function TypingTest() {
     setTypedChars("");
     setCurrentChar("");
     setIncomingChars("");
+  }
+
+  function changeTime(amount) {
+    // change current vars
+    setTime(amount);
+    setMilliseconds(amount);
+    // save setting in local storage
+    localStorage.setItem('milliseconds', amount);
+  }
+
+  function changeSentenceCount(amount) {
+    // change current vars
+    setSentenceCount(amount);
+    // save setting in local storage
+    localStorage.setItem('sentenceCount', amount);
   }
 
   return (
@@ -207,8 +219,7 @@ function TypingTest() {
               className="radio_input"
               checked={milliseconds === 15000}
               onChange={(e) => {
-                setTime(e.target.value * 1000);
-                setMilliseconds(e.target.value * 1000);
+                changeTime(e.target.value * 1000);
               }}
             />
             <label htmlFor="time1" className="radio_label">
@@ -222,8 +233,7 @@ function TypingTest() {
               className="radio_input"
               checked={milliseconds === 30000}
               onChange={(e) => {
-                setTime(e.target.value * 1000);
-                setMilliseconds(e.target.value * 1000);
+                changeTime(e.target.value * 1000);
               }}
             />
             <label htmlFor="time2" className="radio_label">
@@ -237,8 +247,7 @@ function TypingTest() {
               className="radio_input"
               checked={milliseconds === 60000}
               onChange={(e) => {
-                setTime(e.target.value * 1000);
-                setMilliseconds(e.target.value * 1000);
+                changeTime(e.target.value * 1000);
               }}
             />
             <label htmlFor="time3" className="radio_label">
@@ -282,7 +291,7 @@ function TypingTest() {
               className="radio_input"
               checked={sentenceCount == 1}
               onChange={(e) => {
-                setSentenceCount(e.target.value);
+                changeSentenceCount(e.target.value);
               }}
             />
             <label htmlFor="sentences1" className="radio_label">
@@ -296,7 +305,7 @@ function TypingTest() {
               className="radio_input"
               checked={sentenceCount == 2}
               onChange={(e) => {
-                setSentenceCount(e.target.value);
+                changeSentenceCount(e.target.value);
               }}
             />
             <label htmlFor="sentences2" className="radio_label">
@@ -310,7 +319,7 @@ function TypingTest() {
               className="radio_input"
               checked={sentenceCount == 3}
               onChange={(e) => {
-                setSentenceCount(e.target.value);
+                changeSentenceCount(e.target.value);
               }}
             />
             <label htmlFor="sentences3" className="radio_label">
