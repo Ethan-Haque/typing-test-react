@@ -93,8 +93,8 @@ function TypingTest() {
 
       // calculate wpm
       if (testStart && key === " ") {
-        setWordCount(wordCount + 1);
         setWpm(((wordCount + 1) / ((milliseconds - time) / 60000.0)).toFixed(2));
+        setWordCount(wordCount + 1);
       }
 
       //  check for last character
@@ -102,8 +102,8 @@ function TypingTest() {
         // if test already started
         if (testStart) {
           //count last word
-          setWordCount(wordCount + 1);
           setWpm(((wordCount + 1) / ((milliseconds - time) / 60000.0)).toFixed(2));
+          setWordCount(wordCount + 1);
 
           // end
           clearVariables();
