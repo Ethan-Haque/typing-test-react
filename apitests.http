@@ -1,0 +1,5 @@
+
+post http://localhost:8888/.netlify/functions/leaderboard
+Content-Type:  application/json
+
+{"name":"Ethan Haque"}
