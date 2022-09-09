@@ -1,5 +1,6 @@
+get http://localhost:8888/.netlify/functions/score-getAll
+// getAll().then(function (data) {
+    //   console.log(data);
+// });
 
-post http://localhost:8888/.netlify/functions/leaderboard
-Content-Type:  application/json
-
-{"name":"Ethan Haque"}
+# create({ "name": "Ethan Haque", "score": { "accuracy": accuracy, "wpm": wpm }, "mode": { "milliseconds": milliseconds, "sentenceCount": sentenceCount } });

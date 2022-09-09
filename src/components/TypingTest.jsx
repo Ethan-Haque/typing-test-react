@@ -1,10 +1,19 @@
 import React, { useState, useEffect } from "react";
 import useKeyPress from "../hooks/useKeyPress";
+import { create, getAll } from '../utils/leaderboardAPI';
 
 function TypingTest() {
+  // states of game
+  const STATES = {
+    BEGIN: "BEGIN",
+    TEST: "TEST",
+    SUCCESS: "SUCCESS",
+    FAIL: "FAIL"
+  };
+
+  const [status, setStatus] = useState(STATES.BEGIN); //state of game
   const [showMenu, setShowMenu] = useState(false);
   const [endMessage, setEndMessage] = useState("");
-  const [testStart, setTestStart] = useState(false);
 
   // words
   const [words, setWords] = useState("begin");
@@ -66,6 +75,7 @@ function TypingTest() {
 
   // timeout
   if (timerOn && time <= 0) {
+    setStatus(STATES.FAIL);
     clearVariables();
     setEndMessage("Ran out of time. Press CTRL + R to try again.");
   }
@@ -92,7 +102,7 @@ function TypingTest() {
       setIncomingChars(updatedIncomingChars);
 
       // calculate wpm
-      if (testStart && key === " ") {
+      if (status === STATES.TEST && key === " ") {
         setWpm(((wordCount + 1) / ((milliseconds - time) / 60000.0)).toFixed(2));
         setWordCount(wordCount + 1);
       }
@@ -100,17 +110,19 @@ function TypingTest() {
       //  check for last character
       if (incomingChars.length === 0) {
         // if test already started
-        if (testStart) {
+        if (status === STATES.TEST) {
           //count last word
           setWpm(((wordCount + 1) / ((milliseconds - time) / 60000.0)).toFixed(2));
           setWordCount(wordCount + 1);
 
-          // end
+          // success
+          create({ "name": "Ethan Haque", "score": { "accuracy": accuracy, "wpm": wpm }, "mode": { "milliseconds": milliseconds, "sentenceCount": sentenceCount } });
+          setStatus(STATES.SUCCESS);
           clearVariables();
           setEndMessage("Nice Job. Press CTRL + R to try again.");
         } else {
           //start test
-          setTestStart(true);
+          setStatus(STATES.TEST);
           setTimerOn(true);
           setShowMenu(null);
           // set words to option size
@@ -129,7 +141,7 @@ function TypingTest() {
           setIncomingChars(paragraph.substring(1));
         }
       }
-    } else if (!testStart) {
+    } else if (status === STATES.BEGIN) {
       // Keyboard Menu
       if (key === "m") {
         setShowMenu(!showMenu);
@@ -162,7 +174,7 @@ function TypingTest() {
     }
 
     // log accuracy
-    if (testStart) {
+    if (status === STATES.TEST) {
       const updatedKeystrokes = keystrokes + 1;
       setKeystrokes(updatedKeystrokes);
       setAccuracy(
@@ -174,7 +186,6 @@ function TypingTest() {
   // reset all vars
   function clearVariables() {
     setTimerOn(false);
-    setTestStart(false);
     setLeftPadding("");
     setRightPadding("");
     setTypedChars("");

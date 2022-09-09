@@ -9,15 +9,15 @@ const client = new faunadb.Client({
     scheme: 'https',
 });
 
+// submit score
 exports.handler = async function (event, context, callback) {
-    var score = JSON.parse(event.body);
+    var response = JSON.parse(event.body);
     return client.query(
         q.Create(
             q.Collection('Scores'),
-            { data: { name: score.name } }
+            { data: { name: response.name, score: { accuracy: response.score.accuracy, wpm: response.score.wpm }, mode: { milliseconds: response.mode.milliseconds, sentenceCount: response.mode.sentenceCount } } }
         )
     ).then(async response => {
-        console.log(response);
         return callback(null, {
             statusCode: 200,
             body: JSON.stringify(response)
