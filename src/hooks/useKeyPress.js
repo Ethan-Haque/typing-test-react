@@ -5,8 +5,8 @@ const useKeyPress = callback => {
     useEffect(() => {
 
         const downHandler = ({ key }) => {
-            //check for different keystroke and single char key (not CTRL, ESC, etc)
-            if (keyPressed !== key && key.length === 1) {
+            //check for different keystroke
+            if (keyPressed !== key) {
                 setKeyPressed(key);
                 callback && callback(key);
             }

@@ -27,4 +27,7 @@
   .radio_input:checked + .radio_label {
     @apply bg-[#08357a];
   }
+  .key {
+    @apply border-solid border-2 rounded-[5px] shadow-[1px_2px] inline-block font-semibold py-[3px] px-[5px] text-[0.85em] leading-[0.85em];
+  }
 }

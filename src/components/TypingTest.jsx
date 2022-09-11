@@ -8,10 +8,12 @@ function TypingTest() {
     BEGIN: "BEGIN",
     TEST: "TEST",
     SUCCESS: "SUCCESS",
-    FAIL: "FAIL"
+    FAIL: "FAIL",
+    SUBMIT: "SUBMIT",
+    NAME: "NAME"
   };
 
-  const [status, setStatus] = useState(STATES.BEGIN); //state of game
+  const [status, setStatus] = useState(STATES.BEGIN); // current state of game
   const [showMenu, setShowMenu] = useState(false);
   const [endMessage, setEndMessage] = useState("");
 
@@ -38,6 +40,12 @@ function TypingTest() {
   const [typedChars, setTypedChars] = useState("");
   const [currentChar, setCurrentChar] = useState(words.charAt(0));
   const [incomingChars, setIncomingChars] = useState(words.substring(1));
+
+  // ui 
+  const [invalidInput, setInvalidInput] = useState(false);
+  const [topKey, setTopKey] = useState("m");
+  const [topText, setTopText] = useState("Menu");
+
 
   // grab words for typing test
   useEffect(() => {
@@ -77,6 +85,9 @@ function TypingTest() {
   if (timerOn && time <= 0) {
     setStatus(STATES.FAIL);
     clearVariables();
+    setTopText("RESTART");
+    setTopKey("CTRL+R");
+    setShowMenu(false);
     setEndMessage("Ran out of time. Press CTRL + R to try again.");
   }
 
@@ -85,63 +96,7 @@ function TypingTest() {
     let updatedTypedChars = typedChars;
     let updatedIncomingChars = incomingChars;
 
-    // check for correct keystroke
-    if (key === currentChar) {
-      if (leftPadding.length > 0) {
-        setLeftPadding(leftPadding.substring(1)); // remove left padding
-      }
-      if (incomingChars.length < 21) {
-        setRightPadding(rightPadding + " "); //add right padding
-      }
-
-      // update stages
-      updatedTypedChars += currentChar; // add current char to typed chars
-      setTypedChars(updatedTypedChars);
-      setCurrentChar(incomingChars.charAt(0)); // set current char to next char
-      updatedIncomingChars = incomingChars.substring(1); // remove new current char from incoming
-      setIncomingChars(updatedIncomingChars);
-
-      // calculate wpm
-      if (status === STATES.TEST && key === " ") {
-        setWpm(((wordCount + 1) / ((milliseconds - time) / 60000.0)).toFixed(2));
-        setWordCount(wordCount + 1);
-      }
-
-      //  check for last character
-      if (incomingChars.length === 0) {
-        // if test already started
-        if (status === STATES.TEST) {
-          //count last word
-          setWpm(((wordCount + 1) / ((milliseconds - time) / 60000.0)).toFixed(2));
-          setWordCount(wordCount + 1);
-
-          // success
-          create({ "name": "Ethan Haque", "score": { "accuracy": accuracy, "wpm": wpm }, "mode": { "milliseconds": milliseconds, "sentenceCount": sentenceCount } });
-          setStatus(STATES.SUCCESS);
-          clearVariables();
-          setEndMessage("Nice Job. Press CTRL + R to try again.");
-        } else {
-          //start test
-          setStatus(STATES.TEST);
-          setTimerOn(true);
-          setShowMenu(null);
-          // set words to option size
-          let sentences = words.match(/[^.!?]+[.!?]+/g);
-          let paragraph = "";
-          for (var i = 0; i < sentenceCount; i++) {
-            paragraph = paragraph + sentences[i];
-          }
-          setWords(paragraph);
-
-          // reset all variables
-          setLeftPadding(new Array(20).fill(" ").join(""));
-          setRightPadding("");
-          setTypedChars("");
-          setCurrentChar(paragraph.charAt(0));
-          setIncomingChars(paragraph.substring(1));
-        }
-      }
-    } else if (status === STATES.BEGIN) {
+    if (status === STATES.BEGIN) {
       // Keyboard Menu
       if (key === "m") {
         setShowMenu(!showMenu);
@@ -173,8 +128,124 @@ function TypingTest() {
       }
     }
 
+    if (status === STATES.NAME) {
+      if (key.length === 1 && key.match(/[a-z0-9]/i) && currentChar.length + 1 < 12) { // input
+        // validate length of input
+        if (currentChar.length + 1 < 3) {
+          setInvalidInput(true);
+        } else {
+          setInvalidInput(false);
+        }
+        setCurrentChar(currentChar + key);
+      } else if (key === "Backspace") { // delete input
+        // validate length of input
+        if (currentChar.length - 1 < 3) {
+          setInvalidInput(true);
+        } else {
+          setInvalidInput(false);
+        }
+        setCurrentChar(currentChar.slice(0, -1));
+      } else if (key === "Enter" && !invalidInput) { // submit input
+        create({ "name": currentChar, "score": { "accuracy": accuracy, "wpm": wpm }, "mode": { "milliseconds": milliseconds, "sentenceCount": sentenceCount } });
+        setStatus(STATES.SUCCESS);
+        clearVariables();
+        setEndMessage("Nice Job. Press CTRL + R to try again.");
+      }
+
+    } else if (key.length === 1) {
+
+      // check for correct keystroke
+      if (key === currentChar) {
+        setInvalidInput(false);
+        // modify padding to center current char
+        if (leftPadding.length > 0) {
+          setLeftPadding(leftPadding.substring(1));
+        }
+        if (incomingChars.length < 21) {
+          setRightPadding(rightPadding + " ");
+        }
+
+        // update stages
+        updatedTypedChars += currentChar; // add current char to typed chars
+        setTypedChars(updatedTypedChars);
+        setCurrentChar(incomingChars.charAt(0)); // set current char to next char
+        updatedIncomingChars = incomingChars.substring(1); // remove new current char from incoming
+        setIncomingChars(updatedIncomingChars);
+
+        // calculate wpm
+        if (status === STATES.TEST && key === " ") {
+          setWpm(((wordCount + 1) / ((milliseconds - time) / 60000.0)).toFixed(2));
+          setWordCount(wordCount + 1);
+        }
+
+        //  check for last character
+        if (incomingChars.length === 0) {
+          switch (status) {
+            case STATES.BEGIN:
+              // switch to TEST 
+              setStatus(STATES.TEST);
+              setTimerOn(true);
+              setShowMenu(null);
+
+              // set words to option size
+              let sentences = words.match(/[^.!?]+[.!?]+/g);
+              let paragraph = "";
+              for (var i = 0; i < sentenceCount; i++) {
+                paragraph = paragraph + sentences[i];
+              }
+              setWords(paragraph);
+
+              // reset all variables
+              setLeftPadding(new Array(20).fill(" ").join(""));
+              setRightPadding("");
+              setTypedChars("");
+              setCurrentChar(paragraph.charAt(0));
+              setIncomingChars(paragraph.substring(1));
+              break;
+
+            case STATES.TEST:
+              // switch to SUBMIT 
+              setStatus(STATES.SUBMIT);
+              setTopText("RESTART");
+              setTopKey("CTRL+R");
+              setShowMenu(false);
+              //count last word
+              setWpm(((wordCount + 1) / ((milliseconds - time) / 60000.0)).toFixed(2));
+              setWordCount(wordCount + 1);
+              setWords("submit");
+
+              // reset all variables
+              setTimerOn(false);
+              setLeftPadding("  Submit score? ");
+              setRightPadding(new Array(11).fill(" ").join(""));
+              setTypedChars("");
+              setCurrentChar("s");
+              setIncomingChars("ubmit");
+              break;
+
+            case STATES.SUBMIT:
+              // switch to NAME 
+              setStatus(STATES.NAME);
+              // reset all variables
+              setEndMessage("Name:  ");
+              setLeftPadding("");
+              setRightPadding(new Array(5).fill(" ").join(""));
+              setTypedChars("");
+              setCurrentChar("");
+              setIncomingChars("");
+              break;
+
+            default:
+
+
+          }
+        }
+      } else if (status !== STATES.BEGIN) {
+        setInvalidInput(true);
+      }
+    }
     // log accuracy
-    if (status === STATES.TEST) {
+    if (status === STATES.TEST && key.length === 1) {
       const updatedKeystrokes = keystrokes + 1;
       setKeystrokes(updatedKeystrokes);
       setAccuracy(
@@ -265,22 +336,22 @@ function TypingTest() {
           </div>
           {/* Timer Keys */}
           <div className="section">
-            <div className="radio_keys">a</div>
-            <div className="w-1/4 radio_keys">s</div>
-            <div className="radio_keys">d</div>
+            <div className="radio_keys"><span className="key">a</span></div>
+            <div className="w-1/4 radio_keys"><span className="key">s</span></div>
+            <div className="radio_keys"><span className="key">d</span></div>
           </div>
         </div>
         {/* Menu Button */}
         <div className="w-1/6 text">
           <button
             className={
-              showMenu == null ? "text-[#0d47a1] h-[7rem] " : " h-[7rem]"
+              showMenu == null ? "h-[7rem] opacity-0" : " h-[7rem] opacity-100"
             }
             disabled={showMenu == null ? true : false}
-            onClick={() => setShowMenu(!showMenu)}
+            onClick={() => topText === "Menu" ? setShowMenu(!showMenu) : window.location.reload(false)}
           >
-            <div>Menu</div>
-            <div>m</div>
+            <div>{topText}</div>
+            <div className="key">{topKey}</div>
           </button>
         </div>
 
@@ -337,9 +408,9 @@ function TypingTest() {
           </div>
           {/* Sentence Count Keys */}
           <div className="section">
-            <div className="radio_keys">j</div>
-            <div className="w-1/4 radio_keys">k</div>
-            <div className="radio_keys">l</div>
+            <div className="radio_keys"><span className="key">j</span></div>
+            <div className="w-1/4 radio_keys"><span className="key">k</span></div>
+            <div className="radio_keys"><span className="key">l</span></div>
           </div>
         </div>
       </div>
@@ -353,7 +424,9 @@ function TypingTest() {
             {(leftPadding + typedChars).slice(-20)}
           </span>
           {/* current char */}
-          <span className="bg-sky-500">{currentChar}</span>
+          <span className={
+            invalidInput ? "bg-red-600" : "bg-sky-500"
+          }>{currentChar}</span>
           {/* Everything to the right of current char */}
           <span>{incomingChars.substring(0, 20) + rightPadding}</span>
         </p>
