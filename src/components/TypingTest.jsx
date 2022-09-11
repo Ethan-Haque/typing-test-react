@@ -49,7 +49,7 @@ function TypingTest() {
 
   // grab words for typing test
   useEffect(() => {
-    fetch("http://metaphorpsum.com/paragraphs/1/6")
+    fetch("/api/paragraphs/1/6")
       .then(function (response) {
         return response.text();
       })
