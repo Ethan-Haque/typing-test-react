@@ -4,11 +4,15 @@ const useKeyPress = callback => {
     const [keyPressed, setKeyPressed] = useState();
     useEffect(() => {
 
-        const downHandler = ({ key }) => {
-            //check for different keystroke
-            if (keyPressed !== key) {
-                setKeyPressed(key);
-                callback && callback(key);
+        const downHandler = (e) => {
+            // prevent spacebar scrolling 
+            if (e.keyCode === 32) {
+                e.preventDefault();
+            }
+            // check for different keystroke
+            if (keyPressed !== e.key) {
+                setKeyPressed(e.key);
+                callback && callback(e.key);
             }
         };
 

@@ -47,8 +47,10 @@ function TypingTest() {
   const [topText, setTopText] = useState("Menu");
 
 
-  // grab words for typing test
   useEffect(() => {
+    document.body.style.overflow = "hidden"; // remove user scrolling
+
+    // grab words for typing test
     fetch("http://metaphorpsum.com/paragraphs/1/6")
       .then(function (response) {
         return response.text();
@@ -280,7 +282,7 @@ function TypingTest() {
   }
 
   return (
-    <div className="flex flex-col justify-around items-center h-screen  text-white text-[2vmin] bg-[#0d47a1] gap-4">
+    <div name="test" className="flex flex-col justify-around items-center h-screen  text-white text-[2vmin] bg-[#0d47a1] gap-4">
       {/* Menu */}
       <div className="section text-white text-[calc(5px_+_2vmin)]">
         <div className={
