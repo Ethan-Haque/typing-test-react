@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import useKeyPress from "../hooks/useKeyPress";
 import { create, getAll } from '../utils/leaderboardAPI';
+import { Link } from 'react-scroll';
+import { MdKeyboard, MdLeaderboard } from "react-icons/md";
 
 function TypingTest() {
   // states of game
@@ -12,6 +14,9 @@ function TypingTest() {
     SUBMIT: "SUBMIT",
     NAME: "NAME"
   };
+
+  // button link to other component
+  const [otherComponentName, setOtherComponentName] = useState("leaderboard");
 
   const [status, setStatus] = useState(STATES.BEGIN); // current state of game
   const [showMenu, setShowMenu] = useState(false);
@@ -94,6 +99,11 @@ function TypingTest() {
   }
 
   useKeyPress((key) => {
+    // deny keypresses in leaderboard component
+    if (otherComponentName === "test") {
+      return;
+    }
+
     // temp vars
     let updatedTypedChars = typedChars;
     let updatedIncomingChars = incomingChars;
@@ -355,6 +365,16 @@ function TypingTest() {
             <div>{topText}</div>
             <div className="key">{topKey}</div>
           </button>
+          <Link to={otherComponentName} smooth={true} duration={550} className={showMenu == null ? "hidden" : null}>
+            <button onClick={() => otherComponentName === "leaderboard" ? setOtherComponentName("test") : setOtherComponentName("leaderboard")} disabled={showMenu == null ? true : false}
+              className="fixed z-90 bottom-10 right-8 bg-sky-500 w-[calc(20px_+_4vmin)] h-[calc(20px_+_4vmin)] rounded-full drop-shadow-lg flex justify-center items-center text-white text-[calc(4px_+_3vmin)] hover:bg-blue-600 hover:drop-shadow-2xl duration-500">
+              {otherComponentName === "leaderboard" ?
+                <MdLeaderboard />
+                :
+                <MdKeyboard />
+              }
+            </button>
+          </Link>
         </div>
 
         <div className={
