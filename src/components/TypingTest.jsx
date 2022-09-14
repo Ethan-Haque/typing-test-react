@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import useKeyPress from "../hooks/useKeyPress";
-import { create, getAll } from '../utils/leaderboardAPI';
+import { createOrUpdate } from '../utils/leaderboardAPI';
 import { Link } from 'react-scroll';
 import { MdKeyboard, MdLeaderboard } from "react-icons/md";
 
@@ -158,7 +158,7 @@ function TypingTest() {
         }
         setCurrentChar(currentChar.slice(0, -1));
       } else if (key === "Enter" && !invalidInput) { // submit input
-        create({ "name": currentChar, "score": { "accuracy": accuracy, "wpm": wpm }, "mode": { "milliseconds": milliseconds, "sentenceCount": sentenceCount } });
+        createOrUpdate({ "name": currentChar, "score": { "accuracy": accuracy, "wpm": wpm }, "sentenceCount": sentenceCount });
         setStatus(STATES.SUCCESS);
         clearVariables();
         setEndMessage("Nice Job. Press CTRL + R to try again.");
@@ -393,7 +393,7 @@ function TypingTest() {
               className="radio_input"
               checked={sentenceCount == 1}
               onChange={(e) => {
-                changeSentenceCount(e.target.value);
+                changeSentenceCount(1);
               }}
             />
             <label htmlFor="sentences1" className="radio_label">
@@ -407,7 +407,7 @@ function TypingTest() {
               className="radio_input"
               checked={sentenceCount == 2}
               onChange={(e) => {
-                changeSentenceCount(e.target.value);
+                changeSentenceCount(2);
               }}
             />
             <label htmlFor="sentences2" className="radio_label">
@@ -421,7 +421,7 @@ function TypingTest() {
               className="radio_input"
               checked={sentenceCount == 3}
               onChange={(e) => {
-                changeSentenceCount(e.target.value);
+                changeSentenceCount(3);
               }}
             />
             <label htmlFor="sentences3" className="radio_label">

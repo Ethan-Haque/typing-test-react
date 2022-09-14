@@ -1,6 +1,29 @@
-get http://localhost:8888/.netlify/functions/score-getAll
-// getAll().then(function (data) {
-    //   console.log(data);
-// });
+# get http://localhost:8888/.netlify/functions/score-getAll
+# // getAll().then(function (data) {
+#     //   console.log(data);
+# // });
+###
+post http://localhost:8888/.netlify/functions/score-create
+content-type: application/json
 
-# create({ "name": "Ethan Haque", "score": { "accuracy": accuracy, "wpm": wpm }, "mode": { "milliseconds": milliseconds, "sentenceCount": sentenceCount } });
+{
+    "name": "testName",
+    "score": {
+        "accuracy": "22.22",
+        "wpm": "33.33"
+    },
+    "sentenceCount": 3
+}
+
+###
+post http://localhost:8888/.netlify/functions/score-create
+content-type: application/json
+
+{
+    "name": "testName",
+    "score": {
+        "accuracy": "11.11",
+        "wpm": "22.22"
+    },
+    "sentenceCount": 1
+}

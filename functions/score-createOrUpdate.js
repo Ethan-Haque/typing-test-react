@@ -13,15 +13,23 @@ const client = new faunadb.Client({
 exports.handler = async function (event, context, callback) {
     var response = JSON.parse(event.body);
     return client.query(
-        q.Create(
-            q.Collection('Scores'),
-            { data: { name: response.name, score: { accuracy: response.score.accuracy, wpm: response.score.wpm }, mode: { milliseconds: response.mode.milliseconds, sentenceCount: response.mode.sentenceCount } } }
+        q.Let({ // match name and sentenceCount
+            match: q.Match(q.Index('names_sentences'), [response.name, response.sentenceCount]),
+            data: { data: response }
+        },
+            q.If(
+                q.Exists(q.Var('match')),
+                q.Update(q.Select('ref', q.Get(q.Var('match'))), q.Var('data')), // update if exists
+                q.Create(q.Collection('Scores'), q.Var('data')) // create if !exists
+            )
         )
     ).then(async response => {
         return callback(null, {
             statusCode: 200,
             body: JSON.stringify(response)
         });
+    }).catch((err) => {
+        console.error({ err });
     });
 
 };
