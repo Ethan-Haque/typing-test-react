@@ -268,7 +268,7 @@ function TypingTest() {
 
   // submit score and set vars
   function submitScore(name) {
-    createOrUpdate({ "name": name, "score": { "accuracy": accuracy, "wpm": wpm }, "sentenceCount": sentenceCount }).then(response => {
+    createOrUpdate({ "name": name.toLowerCase(), "score": { "accuracy": accuracy, "wpm": wpm }, "sentenceCount": sentenceCount }).then(response => {
       console.log(response);
     });;
     setStatus(STATES.SUCCESS);
