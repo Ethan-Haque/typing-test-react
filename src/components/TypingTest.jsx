@@ -158,10 +158,8 @@ function TypingTest() {
         }
         setCurrentChar(currentChar.slice(0, -1));
       } else if (key === "Enter" && !invalidInput) { // submit input
-        createOrUpdate({ "name": currentChar, "score": { "accuracy": accuracy, "wpm": wpm }, "sentenceCount": sentenceCount });
-        setStatus(STATES.SUCCESS);
-        clearVariables();
-        setEndMessage("Nice Job. Press CTRL + R to try again.");
+        localStorage.setItem('name', currentChar); // set name for future tests
+        submitScore(currentChar);
       }
 
     } else if (key.length === 1) {
@@ -237,19 +235,21 @@ function TypingTest() {
 
             case STATES.SUBMIT:
               // switch to NAME 
-              setStatus(STATES.NAME);
-              // reset all variables
-              setEndMessage("Name:  ");
-              setLeftPadding("");
-              setRightPadding(new Array(5).fill(" ").join(""));
-              setTypedChars("");
-              setCurrentChar("");
-              setIncomingChars("");
+              const storedName = localStorage.getItem('name');
+              if (storedName) { // previous name exists
+                submitScore(storedName);
+              } else {
+                setStatus(STATES.NAME);
+                // reset all variables
+                setEndMessage("Name:  ");
+                setLeftPadding("");
+                setRightPadding(new Array(5).fill(" ").join(""));
+                setTypedChars("");
+                setCurrentChar("");
+                setIncomingChars("");
+              }
               break;
-
             default:
-
-
           }
         }
       } else if (status !== STATES.BEGIN) {
@@ -266,6 +266,15 @@ function TypingTest() {
     }
   });
 
+  // submit score and set vars
+  function submitScore(name) {
+    createOrUpdate({ "name": name, "score": { "accuracy": accuracy, "wpm": wpm }, "sentenceCount": sentenceCount }).then(response => {
+      console.log(response);
+    });;
+    setStatus(STATES.SUCCESS);
+    clearVariables();
+    setEndMessage("Nice Job. Press CTRL + R to try again.");
+  }
   // reset all vars
   function clearVariables() {
     setTimerOn(false);

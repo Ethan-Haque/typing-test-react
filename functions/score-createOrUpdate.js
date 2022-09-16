@@ -9,18 +9,27 @@ const client = new faunadb.Client({
     scheme: 'https',
 });
 
-// submit score
+/*
+Creates new document if one does not already exist.
+Updates previous document if new wpm is higher than previous wpm. 
+Aborts if new wpm is lower.
+*/
 exports.handler = async function (event, context, callback) {
-    var response = JSON.parse(event.body);
+    var score = JSON.parse(event.body);
     return client.query(
-        q.Let({ // match name and sentenceCount
-            match: q.Match(q.Index('names_sentences'), [response.name, response.sentenceCount]),
-            data: { data: response }
+        q.Let({ // look for existing name and sentenceCount 
+            match: q.Match(q.Index('names_sentences'), [score.name, score.sentenceCount]),
+            data: { data: score }
         },
             q.If(
-                q.Exists(q.Var('match')),
-                q.Update(q.Select('ref', q.Get(q.Var('match'))), q.Var('data')), // update if exists
-                q.Create(q.Collection('Scores'), q.Var('data')) // create if !exists
+                q.Exists(q.Var('match')),// match condition
+                q.If( // if match is found
+                    // compare new and old wpm 
+                    q.GT(q.ToDouble(score.score.wpm), q.ToDouble(q.Select(['data', 'score', 'wpm'], q.Get(q.Var('match'))))),
+                    q.Update(q.Select('ref', q.Get(q.Var('match'))), q.Var('data')), // update if new score is higher
+                    q.Abort('New score is lower!') // abort if new score is lower
+                ),
+                q.Create(q.Collection('Scores'), q.Var('data')) // create record if match was false
             )
         )
     ).then(async response => {
@@ -29,8 +38,10 @@ exports.handler = async function (event, context, callback) {
             body: JSON.stringify(response)
         });
     }).catch((err) => {
-        console.error({ err });
+        return callback(null, {
+            statusCode: err.requestResult.statusCode,
+            body: JSON.stringify(err.description)
+        });
     });
 
 };
-
