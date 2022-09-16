@@ -1,0 +1,32 @@
+{
+    name: "all_scores",
+        serialized: true,
+            source: "Scores"
+}
+
+{
+    name: "names",
+        unique: false,
+            serialized: true,
+                source: "Scores",
+                    terms: [
+                        {
+                            field: ["data", "name"]
+                        }
+                    ]
+}
+
+{
+    name: "names_sentences",
+        unique: false,
+            serialized: true,
+                source: "Scores",
+                    terms: [
+                        {
+                            field: ["data", "name"]
+                        },
+                        {
+                            field: ["data", "sentenceCount"]
+                        }
+                    ]
+}

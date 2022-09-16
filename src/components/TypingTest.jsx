@@ -1,10 +1,26 @@
 import React, { useState, useEffect } from "react";
 import useKeyPress from "../hooks/useKeyPress";
+import { createOrUpdate } from '../utils/leaderboardAPI';
+import { Link } from 'react-scroll';
+import { MdKeyboard, MdLeaderboard } from "react-icons/md";
 
 function TypingTest() {
+  // states of game
+  const STATES = {
+    BEGIN: "BEGIN",
+    TEST: "TEST",
+    SUCCESS: "SUCCESS",
+    FAIL: "FAIL",
+    SUBMIT: "SUBMIT",
+    NAME: "NAME"
+  };
+
+  // button link to other component
+  const [otherComponentName, setOtherComponentName] = useState("leaderboard");
+
+  const [status, setStatus] = useState(STATES.BEGIN); // current state of game
   const [showMenu, setShowMenu] = useState(false);
   const [endMessage, setEndMessage] = useState("");
-  const [testStart, setTestStart] = useState(false);
 
   // words
   const [words, setWords] = useState("begin");
@@ -30,8 +46,17 @@ function TypingTest() {
   const [currentChar, setCurrentChar] = useState(words.charAt(0));
   const [incomingChars, setIncomingChars] = useState(words.substring(1));
 
-  // grab words for typing test
+  // ui 
+  const [invalidInput, setInvalidInput] = useState(false);
+  const [topKey, setTopKey] = useState("m");
+  const [topText, setTopText] = useState("Menu");
+
+
   useEffect(() => {
+    document.body.style.overflow = "hidden"; // remove user scrolling
+
+    // grab words for typing test
+
     fetch("/api/paragraphs/1/6")
       .then(function (response) {
         return response.text();
@@ -66,70 +91,25 @@ function TypingTest() {
 
   // timeout
   if (timerOn && time <= 0) {
+    setStatus(STATES.FAIL);
     clearVariables();
+    setTopText("RESTART");
+    setTopKey("CTRL+R");
+    setShowMenu(false);
     setEndMessage("Ran out of time. Press CTRL + R to try again.");
   }
 
   useKeyPress((key) => {
+    // deny keypresses in leaderboard component
+    if (otherComponentName === "test") {
+      return;
+    }
+
     // temp vars
     let updatedTypedChars = typedChars;
     let updatedIncomingChars = incomingChars;
 
-    // check for correct keystroke
-    if (key === currentChar) {
-      if (leftPadding.length > 0) {
-        setLeftPadding(leftPadding.substring(1)); // remove left padding
-      }
-      if (incomingChars.length < 21) {
-        setRightPadding(rightPadding + " "); //add right padding
-      }
-
-      // update stages
-      updatedTypedChars += currentChar; // add current char to typed chars
-      setTypedChars(updatedTypedChars);
-      setCurrentChar(incomingChars.charAt(0)); // set current char to next char
-      updatedIncomingChars = incomingChars.substring(1); // remove new current char from incoming
-      setIncomingChars(updatedIncomingChars);
-
-      // calculate wpm
-      if (testStart && key === " ") {
-        setWpm(((wordCount + 1) / ((milliseconds - time) / 60000.0)).toFixed(2));
-        setWordCount(wordCount + 1);
-      }
-
-      //  check for last character
-      if (incomingChars.length === 0) {
-        // if test already started
-        if (testStart) {
-          //count last word
-          setWpm(((wordCount + 1) / ((milliseconds - time) / 60000.0)).toFixed(2));
-          setWordCount(wordCount + 1);
-
-          // end
-          clearVariables();
-          setEndMessage("Nice Job. Press CTRL + R to try again.");
-        } else {
-          //start test
-          setTestStart(true);
-          setTimerOn(true);
-          setShowMenu(null);
-          // set words to option size
-          let sentences = words.match(/[^.!?]+[.!?]+/g);
-          let paragraph = "";
-          for (var i = 0; i < sentenceCount; i++) {
-            paragraph = paragraph + sentences[i];
-          }
-          setWords(paragraph);
-
-          // reset all variables
-          setLeftPadding(new Array(20).fill(" ").join(""));
-          setRightPadding("");
-          setTypedChars("");
-          setCurrentChar(paragraph.charAt(0));
-          setIncomingChars(paragraph.substring(1));
-        }
-      }
-    } else if (!testStart) {
+    if (status === STATES.BEGIN) {
       // Keyboard Menu
       if (key === "m") {
         setShowMenu(!showMenu);
@@ -161,8 +141,124 @@ function TypingTest() {
       }
     }
 
+    if (status === STATES.NAME) {
+      if (key.length === 1 && key.match(/[a-z0-9]/i) && currentChar.length + 1 < 12) { // input
+        // validate length of input
+        if (currentChar.length + 1 < 3) {
+          setInvalidInput(true);
+        } else {
+          setInvalidInput(false);
+        }
+        setCurrentChar(currentChar + key);
+      } else if (key === "Backspace") { // delete input
+        // validate length of input
+        if (currentChar.length - 1 < 3) {
+          setInvalidInput(true);
+        } else {
+          setInvalidInput(false);
+        }
+        setCurrentChar(currentChar.slice(0, -1));
+      } else if (key === "Enter" && !invalidInput) { // submit input
+        localStorage.setItem('name', currentChar); // set name for future tests
+        submitScore(currentChar);
+      }
+
+    } else if (key.length === 1) {
+
+      // check for correct keystroke
+      if (key === currentChar) {
+        setInvalidInput(false);
+        // modify padding to center current char
+        if (leftPadding.length > 0) {
+          setLeftPadding(leftPadding.substring(1));
+        }
+        if (incomingChars.length < 21) {
+          setRightPadding(rightPadding + " ");
+        }
+
+        // update stages
+        updatedTypedChars += currentChar; // add current char to typed chars
+        setTypedChars(updatedTypedChars);
+        setCurrentChar(incomingChars.charAt(0)); // set current char to next char
+        updatedIncomingChars = incomingChars.substring(1); // remove new current char from incoming
+        setIncomingChars(updatedIncomingChars);
+
+        // calculate wpm
+        if (status === STATES.TEST && key === " ") {
+          setWpm(((wordCount + 1) / ((milliseconds - time) / 60000.0)).toFixed(2));
+          setWordCount(wordCount + 1);
+        }
+
+        //  check for last character
+        if (incomingChars.length === 0) {
+          switch (status) {
+            case STATES.BEGIN:
+              // switch to TEST 
+              setStatus(STATES.TEST);
+              setTimerOn(true);
+              setShowMenu(null);
+
+              // set words to option size
+              let sentences = words.match(/[^.!?]+[.!?]+/g);
+              let paragraph = "";
+              for (var i = 0; i < sentenceCount; i++) {
+                paragraph = paragraph + sentences[i];
+              }
+              setWords(paragraph);
+
+              // reset all variables
+              setLeftPadding(new Array(20).fill(" ").join(""));
+              setRightPadding("");
+              setTypedChars("");
+              setCurrentChar(paragraph.charAt(0));
+              setIncomingChars(paragraph.substring(1));
+              break;
+
+            case STATES.TEST:
+              // switch to SUBMIT 
+              setStatus(STATES.SUBMIT);
+              setTopText("RESTART");
+              setTopKey("CTRL+R");
+              setShowMenu(false);
+              //count last word
+              setWpm(((wordCount + 1) / ((milliseconds - time) / 60000.0)).toFixed(2));
+              setWordCount(wordCount + 1);
+              setWords("submit");
+
+              // reset all variables
+              setTimerOn(false);
+              setLeftPadding("  Submit score? ");
+              setRightPadding(new Array(11).fill(" ").join(""));
+              setTypedChars("");
+              setCurrentChar("s");
+              setIncomingChars("ubmit");
+              break;
+
+            case STATES.SUBMIT:
+              // switch to NAME 
+              const storedName = localStorage.getItem('name');
+              if (storedName) { // previous name exists
+                submitScore(storedName);
+              } else {
+                setStatus(STATES.NAME);
+                // reset all variables
+                setEndMessage("Name:  ");
+                setLeftPadding("");
+                setRightPadding(new Array(5).fill(" ").join(""));
+                setTypedChars("");
+                setCurrentChar("");
+                setIncomingChars("");
+              }
+              break;
+            default:
+          }
+        }
+      } else if (status !== STATES.BEGIN) {
+        setInvalidInput(true);
+      }
+    }
     // log accuracy
-    if (testStart) {
+    if (status === STATES.TEST && key.length === 1) {
       const updatedKeystrokes = keystrokes + 1;
       setKeystrokes(updatedKeystrokes);
       setAccuracy(
@@ -171,10 +267,18 @@ function TypingTest() {
     }
   });
 
+  // submit score and set vars
+  function submitScore(name) {
+    createOrUpdate({ "name": name.toLowerCase(), "score": { "accuracy": accuracy, "wpm": wpm }, "sentenceCount": sentenceCount }).then(response => {
+      console.log(response);
+    });;
+    setStatus(STATES.SUCCESS);
+    clearVariables();
+    setEndMessage("Nice Job. Press CTRL + R to try again.");
+  }
   // reset all vars
   function clearVariables() {
     setTimerOn(false);
-    setTestStart(false);
     setLeftPadding("");
     setRightPadding("");
     setTypedChars("");
@@ -198,7 +302,7 @@ function TypingTest() {
   }
 
   return (
-    <div className="flex flex-col justify-around items-center h-screen  text-white text-[2vmin] bg-[#0d47a1] gap-4">
+    <div name="test" className="flex flex-col justify-around items-center h-screen  text-white text-[2vmin] bg-[#0d47a1] gap-4">
       {/* Menu */}
       <div className="section text-white text-[calc(5px_+_2vmin)]">
         <div className={
@@ -254,23 +358,33 @@ function TypingTest() {
           </div>
           {/* Timer Keys */}
           <div className="section">
-            <div className="radio_keys">a</div>
-            <div className="w-1/4 radio_keys">s</div>
-            <div className="radio_keys">d</div>
+            <div className="radio_keys"><span className="key">a</span></div>
+            <div className="w-1/4 radio_keys"><span className="key">s</span></div>
+            <div className="radio_keys"><span className="key">d</span></div>
           </div>
         </div>
         {/* Menu Button */}
         <div className="w-1/6 text">
           <button
             className={
-              showMenu == null ? "text-[#0d47a1] h-[7rem] " : " h-[7rem]"
+              showMenu == null ? "h-[7rem] opacity-0" : " h-[7rem] opacity-100"
             }
             disabled={showMenu == null ? true : false}
-            onClick={() => setShowMenu(!showMenu)}
+            onClick={() => topText === "Menu" ? setShowMenu(!showMenu) : window.location.reload(false)}
           >
-            <div>Menu</div>
-            <div>m</div>
+            <div>{topText}</div>
+            <div className="key">{topKey}</div>
           </button>
+          <Link to={otherComponentName} smooth={true} duration={550} className={showMenu == null ? "hidden" : null}>
+            <button onClick={() => otherComponentName === "leaderboard" ? setOtherComponentName("test") : setOtherComponentName("leaderboard")} disabled={showMenu == null ? true : false}
+              className="fixed z-90 bottom-10 right-8 bg-sky-500 w-[calc(20px_+_4vmin)] h-[calc(20px_+_4vmin)] rounded-full drop-shadow-lg flex justify-center items-center text-white text-[calc(4px_+_3vmin)] hover:bg-blue-600 hover:drop-shadow-2xl duration-500">
+              {otherComponentName === "leaderboard" ?
+                <MdLeaderboard />
+                :
+                <MdKeyboard />
+              }
+            </button>
+          </Link>
         </div>
 
         <div className={
@@ -289,7 +403,7 @@ function TypingTest() {
               className="radio_input"
               checked={sentenceCount == 1}
               onChange={(e) => {
-                changeSentenceCount(e.target.value);
+                changeSentenceCount(1);
               }}
             />
             <label htmlFor="sentences1" className="radio_label">
@@ -303,7 +417,7 @@ function TypingTest() {
               className="radio_input"
               checked={sentenceCount == 2}
               onChange={(e) => {
-                changeSentenceCount(e.target.value);
+                changeSentenceCount(2);
               }}
             />
             <label htmlFor="sentences2" className="radio_label">
@@ -317,7 +431,7 @@ function TypingTest() {
               className="radio_input"
               checked={sentenceCount == 3}
               onChange={(e) => {
-                changeSentenceCount(e.target.value);
+                changeSentenceCount(3);
               }}
             />
             <label htmlFor="sentences3" className="radio_label">
@@ -326,9 +440,9 @@ function TypingTest() {
           </div>
           {/* Sentence Count Keys */}
           <div className="section">
-            <div className="radio_keys">j</div>
-            <div className="w-1/4 radio_keys">k</div>
-            <div className="radio_keys">l</div>
+            <div className="radio_keys"><span className="key">j</span></div>
+            <div className="w-1/4 radio_keys"><span className="key">k</span></div>
+            <div className="radio_keys"><span className="key">l</span></div>
           </div>
         </div>
       </div>
@@ -342,7 +456,9 @@ function TypingTest() {
             {(leftPadding + typedChars).slice(-20)}
           </span>
           {/* current char */}
-          <span className="bg-sky-500">{currentChar}</span>
+          <span className={
+            invalidInput ? "bg-red-600" : "bg-sky-500"
+          }>{currentChar}</span>
           {/* Everything to the right of current char */}
           <span>{incomingChars.substring(0, 20) + rightPadding}</span>
         </p>
