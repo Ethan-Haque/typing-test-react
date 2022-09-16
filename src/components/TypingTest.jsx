@@ -375,7 +375,7 @@ function TypingTest() {
             <div>{topText}</div>
             <div className="key">{topKey}</div>
           </button>
-          <Link to={otherComponentName} smooth={true} duration={550} className={showMenu == null ? "hidden" : null}>
+          <Link to={otherComponentName} smooth={true} duration={550} ignoreCancelEvents="true" className={showMenu == null ? "hidden" : null}>
             <button onClick={() => otherComponentName === "leaderboard" ? setOtherComponentName("test") : setOtherComponentName("leaderboard")} disabled={showMenu == null ? true : false}
               className="fixed z-90 bottom-10 right-8 bg-sky-500 w-[calc(20px_+_4vmin)] h-[calc(20px_+_4vmin)] rounded-full drop-shadow-lg flex justify-center items-center text-white text-[calc(4px_+_3vmin)] hover:bg-blue-600 hover:drop-shadow-2xl duration-500">
               {otherComponentName === "leaderboard" ?
