@@ -56,6 +56,7 @@ function TypingTest() {
     document.body.style.overflow = "hidden"; // remove user scrolling
 
     // grab words for typing test
+
     fetch("/api/paragraphs/1/6")
       .then(function (response) {
         return response.text();
