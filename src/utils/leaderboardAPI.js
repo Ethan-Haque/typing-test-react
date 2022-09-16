@@ -1,6 +1,6 @@
 
-const create = (data) => {
-  return fetch('/.netlify/functions/score-create', {
+const createOrUpdate = (data) => {
+  return fetch('/.netlify/functions/score-createOrUpdate', {
     body: JSON.stringify(data),
     method: 'POST'
   }).then(response => {
@@ -16,4 +16,4 @@ const getAll = () => {
   });
 };
 
-export { create, getAll };
+export { createOrUpdate, getAll };

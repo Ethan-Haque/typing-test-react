@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import useKeyPress from "../hooks/useKeyPress";
-import { create, getAll } from '../utils/leaderboardAPI';
+import { createOrUpdate } from '../utils/leaderboardAPI';
+import { Link } from 'react-scroll';
+import { MdKeyboard, MdLeaderboard } from "react-icons/md";
 
 function TypingTest() {
   // states of game
@@ -12,6 +14,9 @@ function TypingTest() {
     SUBMIT: "SUBMIT",
     NAME: "NAME"
   };
+
+  // button link to other component
+  const [otherComponentName, setOtherComponentName] = useState("leaderboard");
 
   const [status, setStatus] = useState(STATES.BEGIN); // current state of game
   const [showMenu, setShowMenu] = useState(false);
@@ -47,8 +52,10 @@ function TypingTest() {
   const [topText, setTopText] = useState("Menu");
 
 
-  // grab words for typing test
   useEffect(() => {
+    document.body.style.overflow = "hidden"; // remove user scrolling
+
+    // grab words for typing test
     fetch("/api/paragraphs/1/6")
       .then(function (response) {
         return response.text();
@@ -92,6 +99,11 @@ function TypingTest() {
   }
 
   useKeyPress((key) => {
+    // deny keypresses in leaderboard component
+    if (otherComponentName === "test") {
+      return;
+    }
+
     // temp vars
     let updatedTypedChars = typedChars;
     let updatedIncomingChars = incomingChars;
@@ -146,10 +158,8 @@ function TypingTest() {
         }
         setCurrentChar(currentChar.slice(0, -1));
       } else if (key === "Enter" && !invalidInput) { // submit input
-        create({ "name": currentChar, "score": { "accuracy": accuracy, "wpm": wpm }, "mode": { "milliseconds": milliseconds, "sentenceCount": sentenceCount } });
-        setStatus(STATES.SUCCESS);
-        clearVariables();
-        setEndMessage("Nice Job. Press CTRL + R to try again.");
+        localStorage.setItem('name', currentChar); // set name for future tests
+        submitScore(currentChar);
       }
 
     } else if (key.length === 1) {
@@ -225,19 +235,21 @@ function TypingTest() {
 
             case STATES.SUBMIT:
               // switch to NAME 
-              setStatus(STATES.NAME);
-              // reset all variables
-              setEndMessage("Name:  ");
-              setLeftPadding("");
-              setRightPadding(new Array(5).fill(" ").join(""));
-              setTypedChars("");
-              setCurrentChar("");
-              setIncomingChars("");
+              const storedName = localStorage.getItem('name');
+              if (storedName) { // previous name exists
+                submitScore(storedName);
+              } else {
+                setStatus(STATES.NAME);
+                // reset all variables
+                setEndMessage("Name:  ");
+                setLeftPadding("");
+                setRightPadding(new Array(5).fill(" ").join(""));
+                setTypedChars("");
+                setCurrentChar("");
+                setIncomingChars("");
+              }
               break;
-
             default:
-
-
           }
         }
       } else if (status !== STATES.BEGIN) {
@@ -254,6 +266,15 @@ function TypingTest() {
     }
   });
 
+  // submit score and set vars
+  function submitScore(name) {
+    createOrUpdate({ "name": name, "score": { "accuracy": accuracy, "wpm": wpm }, "sentenceCount": sentenceCount }).then(response => {
+      console.log(response);
+    });;
+    setStatus(STATES.SUCCESS);
+    clearVariables();
+    setEndMessage("Nice Job. Press CTRL + R to try again.");
+  }
   // reset all vars
   function clearVariables() {
     setTimerOn(false);
@@ -280,7 +301,7 @@ function TypingTest() {
   }
 
   return (
-    <div className="flex flex-col justify-around items-center h-screen  text-white text-[2vmin] bg-[#0d47a1] gap-4">
+    <div name="test" className="flex flex-col justify-around items-center h-screen  text-white text-[2vmin] bg-[#0d47a1] gap-4">
       {/* Menu */}
       <div className="section text-white text-[calc(5px_+_2vmin)]">
         <div className={
@@ -353,6 +374,16 @@ function TypingTest() {
             <div>{topText}</div>
             <div className="key">{topKey}</div>
           </button>
+          <Link to={otherComponentName} smooth={true} duration={550} className={showMenu == null ? "hidden" : null}>
+            <button onClick={() => otherComponentName === "leaderboard" ? setOtherComponentName("test") : setOtherComponentName("leaderboard")} disabled={showMenu == null ? true : false}
+              className="fixed z-90 bottom-10 right-8 bg-sky-500 w-[calc(20px_+_4vmin)] h-[calc(20px_+_4vmin)] rounded-full drop-shadow-lg flex justify-center items-center text-white text-[calc(4px_+_3vmin)] hover:bg-blue-600 hover:drop-shadow-2xl duration-500">
+              {otherComponentName === "leaderboard" ?
+                <MdLeaderboard />
+                :
+                <MdKeyboard />
+              }
+            </button>
+          </Link>
         </div>
 
         <div className={
@@ -371,7 +402,7 @@ function TypingTest() {
               className="radio_input"
               checked={sentenceCount == 1}
               onChange={(e) => {
-                changeSentenceCount(e.target.value);
+                changeSentenceCount(1);
               }}
             />
             <label htmlFor="sentences1" className="radio_label">
@@ -385,7 +416,7 @@ function TypingTest() {
               className="radio_input"
               checked={sentenceCount == 2}
               onChange={(e) => {
-                changeSentenceCount(e.target.value);
+                changeSentenceCount(2);
               }}
             />
             <label htmlFor="sentences2" className="radio_label">
@@ -399,7 +430,7 @@ function TypingTest() {
               className="radio_input"
               checked={sentenceCount == 3}
               onChange={(e) => {
-                changeSentenceCount(e.target.value);
+                changeSentenceCount(3);
               }}
             />
             <label htmlFor="sentences3" className="radio_label">
