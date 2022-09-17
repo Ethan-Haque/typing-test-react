@@ -185,6 +185,10 @@ function TypingTest() {
 
         // calculate wpm
         if (status === STATES.TEST && key === " ") {
+          console.log("WordCount: ", wordCount + 1);
+          console.log("milliseconds: ", milliseconds);
+          console.log("time: ", time);
+          console.log("final: ",((wordCount + 1) / ((milliseconds - time) / 60000.0)).toFixed(2));
           setWpm(((wordCount + 1) / ((milliseconds - time) / 60000.0)).toFixed(2));
           setWordCount(wordCount + 1);
         }
