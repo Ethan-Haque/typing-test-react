@@ -31,6 +31,7 @@ function TypingTest() {
   const [milliseconds, setMilliseconds] = useState(30000);
   const [time, setTime] = React.useState(milliseconds);
   const [timerOn, setTimerOn] = React.useState(false);
+  const [startTime, setStartTime] = React.useState(null);
 
   // stats
   const [keystrokes, setKeystrokes] = useState(0);
@@ -81,7 +82,7 @@ function TypingTest() {
     let interval = null;
     if (timerOn) {
       interval = setInterval(() => {
-        setTime((prevTime) => prevTime - 100);
+        setTime(time + Math.floor((startTime.getTime() - new Date().getTime())));
       }, 100);
     } else if (!timerOn) {
       clearInterval(interval);
@@ -92,6 +93,7 @@ function TypingTest() {
   // timeout
   if (timerOn && time <= 0) {
     setStatus(STATES.FAIL);
+    setTime(0);
     clearVariables();
     setTopText("RESTART");
     setTopKey("CTRL+R");
@@ -200,6 +202,7 @@ function TypingTest() {
               // switch to TEST 
               setStatus(STATES.TEST);
               setTimerOn(true);
+              setStartTime(new Date());
               setShowMenu(null);
 
               // set words to option size
