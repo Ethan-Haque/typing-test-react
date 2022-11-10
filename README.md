@@ -11,7 +11,7 @@ https://eh-type.netlify.app/ (live)
 </h4>
 
 <h4 align="center">
-	Status: In Progress
+	Version: 1.0
 </h4>
 
 <p align="center">
@@ -29,6 +29,7 @@ https://eh-type.netlify.app/ (live)
 * [x] Settings for timer and number of sentences persist in local storage. Accessible with both keyboard and mouse.
 * [x] Sentences grabbed from Metaphorpsum API. 
 * [x] Leaderboard with all scores displayed by sentence count.
+#### To be added
 * [ ] Random word mode.
 * [ ] Score system based off of accuracy and wpm.
 * [ ] Sorting system for leaderboard.
