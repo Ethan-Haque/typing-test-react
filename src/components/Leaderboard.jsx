@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from "react";
-import { getAll } from '../utils/leaderboardAPI';
+// import { getAll } from '../utils/leaderboardAPI';
 
 const Leaderboard = () => {
     const [scores, setScores] = useState(null);
     const [tableSentences, setTableSentences] = useState(1);
     useEffect(() => {
         // get scores from database
-        getAll().then(function (response) {
-            setScores(response.data);
-        });
+        // getAll().then(function (response) {
+        //     setScores(response.data);
+        // });
     }, []);
 
     function changeTableSentences(amount) {

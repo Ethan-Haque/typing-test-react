@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import useKeyPress from "../hooks/useKeyPress";
-import { createOrUpdate } from '../utils/leaderboardAPI';
+// import { createOrUpdate } from '../utils/leaderboardAPI';
 import { Link } from 'react-scroll';
 import { MdKeyboard, MdLeaderboard } from "react-icons/md";
 
@@ -161,7 +161,7 @@ function TypingTest() {
         setCurrentChar(currentChar.slice(0, -1));
       } else if (key === "Enter" && !invalidInput) { // submit input
         localStorage.setItem('name', currentChar); // set name for future tests
-        submitScore(currentChar);
+        // submitScore(currentChar);
       }
 
     } else if (key.length === 1) {
@@ -240,7 +240,7 @@ function TypingTest() {
               // switch to NAME 
               const storedName = localStorage.getItem('name');
               if (storedName) { // previous name exists
-                submitScore(storedName);
+                // submitScore(storedName);
               } else {
                 setStatus(STATES.NAME);
                 // reset all variables
@@ -270,14 +270,14 @@ function TypingTest() {
   });
 
   // submit score and set vars
-  function submitScore(name) {
-    createOrUpdate({ "name": name.toLowerCase(), "score": { "accuracy": accuracy, "wpm": wpm }, "sentenceCount": sentenceCount }).then(response => {
-      console.log(response);
-    });;
-    setStatus(STATES.SUCCESS);
-    clearVariables();
-    setEndMessage("Nice Job. Press CTRL + R to try again.");
-  }
+  // function submitScore(name) {
+  //   createOrUpdate({ "name": name.toLowerCase(), "score": { "accuracy": accuracy, "wpm": wpm }, "sentenceCount": sentenceCount }).then(response => {
+  //     console.log(response);
+  //   });;
+  //   setStatus(STATES.SUCCESS);
+  //   clearVariables();
+  //   setEndMessage("Nice Job. Press CTRL + R to try again.");
+  // }
   // reset all vars
   function clearVariables() {
     setTimerOn(false);
