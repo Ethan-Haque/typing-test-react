@@ -170,7 +170,8 @@ function TypingTest() {
         const res = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/user/${currentChar}`,{
           headers: {
             'x-api-key': process.env.REACT_APP_WORD_API_KEY
-          }
+          },
+          credentials: 'include',
         });
         const data = await res.json();
         setTopKey("CTRL+R");
@@ -217,6 +218,7 @@ function TypingTest() {
               'x-api-key': process.env.REACT_APP_WORD_API_KEY,
               'Content-Type': 'application/json'
             },
+            credentials: 'include',
             body: JSON.stringify({username: username, passcode: currentChar})
           });
           const data = await res.json();
@@ -230,6 +232,7 @@ function TypingTest() {
               'x-api-key': process.env.REACT_APP_WORD_API_KEY,
               'Content-Type': 'application/json'
             },
+            credentials: 'include',
             body: JSON.stringify({username: username, passcode: currentChar})
           });
           const data = await res.json();
