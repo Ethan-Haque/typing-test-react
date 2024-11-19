@@ -12,7 +12,8 @@ function TypingTest() {
     SUCCESS: "SUCCESS",
     FAIL: "FAIL",
     SUBMIT: "SUBMIT",
-    NAME: "NAME"
+    NAME: "NAME",
+    PASSWORD: "PASSWORD",
   };
 
   // button link to other component
@@ -21,6 +22,9 @@ function TypingTest() {
   const [status, setStatus] = useState(STATES.BEGIN); // current state of game
   const [showMenu, setShowMenu] = useState(false);
   const [endMessage, setEndMessage] = useState("");
+
+  const [username, setUsername] = useState('');
+  const [accountExists, setAccountExists] = useState(false);
 
   // words
   const [words, setWords] = useState("begin");
@@ -55,9 +59,12 @@ function TypingTest() {
 
   useEffect(() => {
     document.body.style.overflow = "hidden"; // remove user scrolling
-
-    // grab words for typing test
-    fetch("http://metaphorpsum.com/paragraphs/1/6")
+    // grab words for test
+    fetch(`${process.env.REACT_APP_API_ENDPOINT}/sentences/3`,{
+      headers: {
+        'x-api-key': process.env.REACT_APP_WORD_API_KEY
+      }
+    })
       .then(function (response) {
         return response.text();
       })
@@ -100,7 +107,7 @@ function TypingTest() {
     setEndMessage("Ran out of time. Press CTRL + R to try again.");
   }
 
-  useKeyPress((key) => {
+  useKeyPress(async (key) => {
     // deny keypresses in leaderboard component
     if (otherComponentName === "test") {
       return;
@@ -160,10 +167,76 @@ function TypingTest() {
         }
         setCurrentChar(currentChar.slice(0, -1));
       } else if (key === "Enter" && !invalidInput) { // submit input
-        localStorage.setItem('name', currentChar); // set name for future tests
+        const res = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/user/${currentChar}`,{
+          headers: {
+            'x-api-key': process.env.REACT_APP_WORD_API_KEY
+          }
+        });
+        const data = await res.json();
+        setTopKey("CTRL+R");
+        if(data.exists){
+          setTopText("Welcome back, " + currentChar);
+          setAccountExists(true);
+        }else{
+          setTopText("Thank you for joining " + currentChar);
+          setAccountExists(false);
+        }
+        setUsername(currentChar);
+        setStatus(STATES.PASSWORD);
+        
+        // reset all variables
+        setEndMessage("Password:  ");
+        setLeftPadding("");
+        setRightPadding(new Array(5).fill(" ").join(""));
+        setTypedChars("");
+        setCurrentChar("");
+        setIncomingChars("");
+      }
+    } else if (status === STATES.PASSWORD) {
+      if (key.length === 1 && key.match(/[a-z0-9]/i) && currentChar.length + 1 < 12) { // input
+        // validate length of input
+        if (currentChar.length + 1 < 3) {
+          setInvalidInput(true);
+        } else {
+          setInvalidInput(false);
+        }
+        setCurrentChar(currentChar + key);
+      } else if (key === "Backspace") { // delete input
+        // validate length of input
+        if (currentChar.length - 1 < 3) {
+          setInvalidInput(true);
+        } else {
+          setInvalidInput(false);
+        }
+        setCurrentChar(currentChar.slice(0, -1));
+      } else if (key === "Enter" && !invalidInput) { // submit input
+        if(accountExists){
+          const res = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/user/login`,{
+            method: 'POST',
+            headers: {
+              'x-api-key': process.env.REACT_APP_WORD_API_KEY,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({username: username, passcode: currentChar})
+          });
+          const data = await res.json();
+          console.log(data);
+
+        }else{
+          console.log(username, currentChar);
+          const res = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/user`,{
+            method: 'POST',
+            headers: {
+              'x-api-key': process.env.REACT_APP_WORD_API_KEY,
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({username: username, passcode: currentChar})
+          });
+          const data = await res.json();
+          console.log(data);
+        }
         // submitScore(currentChar);
       }
-
     } else if (key.length === 1) {
 
       // check for correct keystroke
@@ -238,9 +311,18 @@ function TypingTest() {
 
             case STATES.SUBMIT:
               // switch to NAME 
-              const storedName = localStorage.getItem('name');
-              if (storedName) { // previous name exists
-                // submitScore(storedName);
+              const res = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/user/session`, {
+                method: 'GET',
+                credentials: 'include',  // Include cookies in the request
+                headers: {
+                  'x-api-key': process.env.REACT_APP_WORD_API_KEY
+                }
+              });
+              console.log(res);
+              const data = await res.json();
+              console.log('test',data)
+              if (data.exists) { // session exists
+                submitScore(data.name);
               } else {
                 setStatus(STATES.NAME);
                 // reset all variables
@@ -270,14 +352,14 @@ function TypingTest() {
   });
 
   // submit score and set vars
-  // function submitScore(name) {
-  //   createOrUpdate({ "name": name.toLowerCase(), "score": { "accuracy": accuracy, "wpm": wpm }, "sentenceCount": sentenceCount }).then(response => {
-  //     console.log(response);
-  //   });;
-  //   setStatus(STATES.SUCCESS);
-  //   clearVariables();
-  //   setEndMessage("Nice Job. Press CTRL + R to try again.");
-  // }
+  function submitScore(name) {
+    // createOrUpdate({ "name": name.toLowerCase(), "score": { "accuracy": accuracy, "wpm": wpm }, "sentenceCount": sentenceCount }).then(response => {
+    //   console.log(response);
+    // });;
+    setStatus(STATES.SUCCESS);
+    clearVariables();
+    setEndMessage("Nice Job. Press CTRL + R to try again.");
+  }
   // reset all vars
   function clearVariables() {
     setTimerOn(false);
