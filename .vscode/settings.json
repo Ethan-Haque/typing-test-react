@@ -1,6 +1,10 @@
 {
     "cSpell.words": [
         "faunadb",
+        "keypresses",
         "Leaderboard"
+    ],
+    "cSpell.ignoreWords": [
+        "ubmit"
     ]
 }
