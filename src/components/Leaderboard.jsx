@@ -40,7 +40,7 @@ const Leaderboard = ({ refreshTrigger }) => {
     }, [tableSentences]);
 
     useEffect(() => {
-        if (refreshTrigger.sentencecount !== null) {
+        if (refreshTrigger.sentencecount) {
             setTableSentences(refreshTrigger.sentencecount);
             fillLeaderboard();
         }
