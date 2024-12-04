@@ -5,10 +5,9 @@ import { useState } from "react";
 function App() {
   const [refreshTrigger, setRefreshTrigger] = useState({ sentencecount: null }); //to update score after score submission
 
-  const handleScoreUpdate = () => {
-    // Toggle the trigger to signal leaderboard refresh
-    setRefreshTrigger((prev) => !prev);
-  };
+  const handleScoreUpdate = (sentencecount) => {
+    setRefreshTrigger({ sentencecount }); // Pass the updated sentencecount
+};
 
   return (
     <div>
