@@ -4,7 +4,7 @@ import useKeyPress from "../hooks/useKeyPress";
 import { Link } from 'react-scroll';
 import { MdKeyboard, MdLeaderboard } from "react-icons/md";
 
-function TypingTest() {
+function TypingTest({onScoreUpdate}) {
   // states of game
   const STATES = {
     BEGIN: "BEGIN",
@@ -379,6 +379,7 @@ function TypingTest() {
       },
       body: JSON.stringify({ "accuracy": accuracy, "wpm": wpm, "sentencecount": sentenceCount, "timer": milliseconds / 1000,})
     }).then(response => {
+      onScoreUpdate();
       setStatus(STATES.SUCCESS);
       clearVariables();
       setTopText("Score Saved")

@@ -1,19 +1,51 @@
-import React, { useState, useEffect } from "react";
-// import { getAll } from '../utils/leaderboardAPI';
+import React, { useState, useEffect, useRef } from "react";
 
-const Leaderboard = () => {
-    const [scores, setScores] = useState(null);
+const Leaderboard = ({ refreshTrigger }) => {
+    const [scores, setScores] = useState([]);
+    const cachedScores = useRef({});
     const [tableSentences, setTableSentences] = useState(1);
     useEffect(() => {
         // get scores from database
-        // getAll().then(function (response) {
-        //     setScores(response.data);
-        // });
+        fillLeaderboard();
     }, []);
 
-    function changeTableSentences(amount) {
-        setTableSentences(amount);
+    async function fillLeaderboard() {
+        try {
+            const response = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/score/all?sentencecount=${tableSentences}`,
+                {
+                    headers: {
+                        'x-api-key': process.env.REACT_APP_WORD_API_KEY
+                    }
+                }
+            );
+            if (!response.ok) {
+                throw new Error('Failed to fetch scores');
+            }
+            const data = await response.json();
+            setScores(data);
+            cachedScores.current[tableSentences] = data; // Cache the scores
+        } catch (error) {
+            console.error('Error fetching leaderboard data:', error);
+        }
     }
+
+    useEffect(() => {
+        if (cachedScores.current[tableSentences]) {
+            // Use cached data if available
+            setScores(cachedScores.current[tableSentences]);
+        } else {
+            // Fetch data from the API if not cached
+            fillLeaderboard();
+        }
+    }, [tableSentences]);
+
+    useEffect(() => {
+        if (refreshTrigger.sentencecount !== null) {
+            setTableSentences(refreshTrigger.sentencecount);
+            fillLeaderboard();
+        }
+
+    }, [refreshTrigger]);
 
     return (
         <div name="leaderboard" className="flex justify-center items-center h-screen text-white text-[2vmin] bg-[#0d47a1] ">
@@ -29,67 +61,42 @@ const Leaderboard = () => {
                         </thead>
                         <tbody className="overflow-y-scroll block h-[70vh]">
                             {/* Table Content */}
-                            {scores != null && scores.map(({ data: { name, score: { wpm, accuracy }, sentenceCount } }, index) => {
-                                if (sentenceCount === tableSentences) {
-                                    index *= 4; // multiplied by each set of keys required
-                                    // ex: keys for index 0: 0,1,2,3, 1: 4,5,6,7 ...
-                                    return (
-                                        <tr key={index}>
-                                            <td className="px-6 py-4  w-[20vw]" key={index + 1}>{name}</td>
-                                            <td className="px-6 py-4 w-[20vw]" key={index + 2}>{wpm}</td>
-                                            <td className="px-6 py-4 w-[20vw]" key={index + 3}>{accuracy}%</td>
-                                        </tr>
-                                    );
-                                }
+                            {scores.length > 0 && scores.map(({ username, wpm, accuracy, sentencecount }, index) => {
+                                index *= 4; // multiplied by each set of keys required
+                                // ex: keys for index 0: 0,1,2,3, 1: 4,5,6,7 ...
+                                return (
+                                    <tr key={index}>
+                                        <td className="px-6 py-4  w-[20vw]" key={index + 1}>{username}</td>
+                                        <td className="px-6 py-4 w-[20vw]" key={index + 2}>{wpm}</td>
+                                        <td className="px-6 py-4 w-[20vw]" key={index + 3}>{accuracy}%</td>
+                                    </tr>
+                                );
                             })}
                         </tbody>
                     </table>
                 </div>
-                <div className="px-6 py-4 text-right">Sentences:
-                    {/* SentenceCount Radio */}
+                <div className="px-6 py-4 text-right">
+                    Sentences:
                     <div className="radio">
-                        <input
-                            type="radio"
-                            name="tableSentences"
-                            value="1"
-                            id="tableSentences1"
-                            className="radio_input"
-                            checked={tableSentences === 1}
-                            onChange={(e) => {
-                                changeTableSentences(1);
-                            }}
-                        />
-                        <label htmlFor="tableSentences1" className="radio_label">
-                            &nbsp;1&nbsp;
-                        </label>
-                        <input
-                            type="radio"
-                            name="tableSentences"
-                            value="2"
-                            id="tableSentences2"
-                            className="radio_input"
-                            checked={tableSentences === 2}
-                            onChange={(e) => {
-                                changeTableSentences(2);
-                            }}
-                        />
-                        <label htmlFor="tableSentences2" className="radio_label">
-                            &nbsp;2&nbsp;
-                        </label>
-                        <input
-                            type="radio"
-                            name="tableSentences"
-                            value="3"
-                            id="tableSentences3"
-                            className="radio_input"
-                            checked={tableSentences === 3}
-                            onChange={(e) => {
-                                changeTableSentences(3);
-                            }}
-                        />
-                        <label htmlFor="tableSentences3" className="radio_label">
-                            &nbsp;3&nbsp;
-                        </label>
+                        {[1, 2, 3].map((count) => (
+                            <React.Fragment key={count}>
+                                <input
+                                    type="radio"
+                                    name="tableSentences"
+                                    value={count}
+                                    id={`tableSentences${count}`}
+                                    className="radio_input"
+                                    checked={tableSentences === count}
+                                    onChange={() => setTableSentences(count)}
+                                />
+                                <label
+                                    htmlFor={`tableSentences${count}`}
+                                    className="radio_label"
+                                >
+                                    &nbsp;{count}&nbsp;
+                                </label>
+                            </React.Fragment>
+                        ))}
                     </div>
                 </div>
             </div>
