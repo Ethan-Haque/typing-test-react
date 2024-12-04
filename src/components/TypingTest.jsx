@@ -377,6 +377,7 @@ function TypingTest({onScoreUpdate}) {
         'x-api-key': process.env.REACT_APP_WORD_API_KEY,
         'Content-Type': 'application/json'
       },
+      credentials: 'include',  // Include cookies in the request
       body: JSON.stringify({ "accuracy": accuracy, "wpm": wpm, "sentencecount": sentenceCount, "timer": milliseconds / 1000,})
     }).then(response => {
       onScoreUpdate();
