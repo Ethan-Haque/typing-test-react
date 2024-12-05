@@ -4,7 +4,7 @@ import useKeyPress from "../hooks/useKeyPress";
 import { Link } from 'react-scroll';
 import { MdKeyboard, MdLeaderboard } from "react-icons/md";
 
-function TypingTest() {
+function TypingTest({onScoreUpdate}) {
   // states of game
   const STATES = {
     BEGIN: "BEGIN",
@@ -222,10 +222,18 @@ function TypingTest() {
             body: JSON.stringify({username: username, passcode: currentChar})
           });
           const data = await res.json();
-          console.log(data);
-
+          if(data.loggedIn){
+            submitScore();
+          }
+          else{
+            setTopText(data.msg);
+            setLeftPadding("");
+            setRightPadding(new Array(5).fill(" ").join(""));
+            setTypedChars("");
+            setCurrentChar("");
+            setIncomingChars("");
+          }
         }else{
-          console.log(username, currentChar);
           const res = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/user`,{
             method: 'POST',
             headers: {
@@ -233,12 +241,21 @@ function TypingTest() {
               'Content-Type': 'application/json'
             },
             credentials: 'include',
-            body: JSON.stringify({username: username, passcode: currentChar})
+            body: JSON.stringify({ username: username, passcode: currentChar })
           });
           const data = await res.json();
-          console.log(data);
+          if (data.success) {
+            submitScore();
+          }
+          else {
+            setTopText(data.msg);
+            setLeftPadding("");
+            setRightPadding(new Array(5).fill(" ").join(""));
+            setTypedChars("");
+            setCurrentChar("");
+            setIncomingChars("");
+          }
         }
-        // submitScore(currentChar);
       }
     } else if (key.length === 1) {
 
@@ -321,11 +338,9 @@ function TypingTest() {
                   'x-api-key': process.env.REACT_APP_WORD_API_KEY
                 }
               });
-              console.log(res);
               const data = await res.json();
-              console.log('test',data)
-              if (data.exists) { // session exists
-                submitScore(data.name);
+              if (data.loggedIn && data.username) { // session exists
+                submitScore(data.username);
               } else {
                 setStatus(STATES.NAME);
                 // reset all variables
@@ -355,13 +370,22 @@ function TypingTest() {
   });
 
   // submit score and set vars
-  function submitScore(name) {
-    // createOrUpdate({ "name": name.toLowerCase(), "score": { "accuracy": accuracy, "wpm": wpm }, "sentenceCount": sentenceCount }).then(response => {
-    //   console.log(response);
-    // });;
-    setStatus(STATES.SUCCESS);
-    clearVariables();
-    setEndMessage("Nice Job. Press CTRL + R to try again.");
+  function submitScore() {
+    fetch(`${process.env.REACT_APP_API_ENDPOINT}/score`, {
+      method: 'POST',
+      headers: {
+        'x-api-key': process.env.REACT_APP_WORD_API_KEY,
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',  // Include cookies in the request
+      body: JSON.stringify({ "accuracy": accuracy, "wpm": wpm, "sentencecount": sentenceCount, "timer": milliseconds / 1000,})
+    }).then(response => {
+      onScoreUpdate();
+      setStatus(STATES.SUCCESS);
+      clearVariables();
+      setTopText("Score Saved")
+      setEndMessage("Nice Job. Press CTRL + R to try again.");
+    });
   }
   // reset all vars
   function clearVariables() {
