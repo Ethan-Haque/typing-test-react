@@ -3,10 +3,6 @@
 </h1>
 
 <h3 align="center">
-	Minimal typing test with leaderboard.
-</h3>
-
-<h3 align="center">
 	<b>Live:</b> type.ethanhaque.ca<br>
 	<b>1.0 Serverless:</b> https://eh-type.netlify.app/<br>
 	<b>Backend:</b> https://github.com/Ethan-Haque/words-api
@@ -22,6 +18,8 @@
 	<a href="#tech-stack">Tech Stack</a>
 </p>
 
+## Overview
+Minimal typing test designed to measure and improve typing speed and accuracy. With a keyboard-first approach, users can seamlessly complete tests, track performance metrics, and compare their results on a dynamic leaderboard.
 ## Demo
 ![TypingTest](https://user-images.githubusercontent.com/40015195/191353106-ae9d8293-ed84-495f-8f1e-f16aa0dc098f.gif)
 
