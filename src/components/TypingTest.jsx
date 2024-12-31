@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from "react";
 import useKeyPress from "../hooks/useKeyPress";
 // import { createOrUpdate } from '../utils/leaderboardAPI';
-import { Link } from 'react-scroll';
+import { Link, scroller } from 'react-scroll';
 import { MdKeyboard, MdLeaderboard } from "react-icons/md";
 
-function TypingTest({onScoreUpdate}) {
+function TypingTest({ onScoreUpdate }) {
   // states of game
   const STATES = {
     BEGIN: "BEGIN",
@@ -15,6 +15,30 @@ function TypingTest({onScoreUpdate}) {
     NAME: "NAME",
     PASSWORD: "PASSWORD",
   };
+
+  const themes = {
+    grey: {
+      "--bg-color": "#1a202c", // Dark Gray-Blue
+      "--text-color": "#e2e8f0", // Light Gray
+      "--highlight-color": "#38b2ac", // Teal
+      "--incorrect-color": "#e53e3e", // Vivid Red
+      "--typed-color": "#b7b7b7",
+    },
+    light: {
+      "--bg-color": "#f7fafc", // Off-White
+      "--text-color": "#2d3748", // Charcoal Gray
+      "--highlight-color": "#e0e0e0", // Sky Blue
+      "--incorrect-color": "#fc8181", // Soft Red
+    },
+    dark: {
+      "--bg-color": "#000000",
+      "--text-color": "#ffffff",
+      "--highlight-color": "#1e90ff",
+      "--incorrect-color": "#ff4500",
+      "--typed-color": "#696969",
+    }
+  };
+
 
   // button link to other component
   const [otherComponentName, setOtherComponentName] = useState("leaderboard");
@@ -55,12 +79,30 @@ function TypingTest({onScoreUpdate}) {
   const [invalidInput, setInvalidInput] = useState(false);
   const [topKey, setTopKey] = useState("m");
   const [topText, setTopText] = useState("Menu");
+  const [theme, setTheme] = useState("grey");
 
 
   useEffect(() => {
     document.body.style.overflow = "hidden"; // remove user scrolling
+
+    //set local values
+    const storedTheme = localStorage.getItem('theme');
+    const storedMilliseconds = localStorage.getItem('milliseconds');
+    const storedSentenceCount = localStorage.getItem('sentenceCount');
+
+    if (storedTheme) {
+      switchTheme(storedTheme);
+    }
+    if (storedMilliseconds) {
+      setMilliseconds(JSON.parse(storedMilliseconds));
+      setTime(JSON.parse(storedMilliseconds));
+    }
+    if (storedSentenceCount) {
+      setSentenceCount(JSON.parse(storedSentenceCount));
+    }
+
     // grab words for test
-    fetch(`${process.env.REACT_APP_API_ENDPOINT}/sentences/3`,{
+    fetch(`${process.env.REACT_APP_API_ENDPOINT}/sentences/3`, {
       headers: {
         'x-api-key': process.env.REACT_APP_WORD_API_KEY
       }
@@ -71,16 +113,6 @@ function TypingTest({onScoreUpdate}) {
       .then(function (data) {
         setWords(data);
       });
-
-    const storedMilliseconds = localStorage.getItem('milliseconds');
-    const storedSentenceCount = localStorage.getItem('sentenceCount');
-    if (storedMilliseconds) {
-      setMilliseconds(JSON.parse(storedMilliseconds));
-      setTime(JSON.parse(storedMilliseconds));
-    }
-    if (storedSentenceCount) {
-      setSentenceCount(JSON.parse(storedSentenceCount));
-    }
   }, []);
 
   // timer logic
@@ -107,9 +139,24 @@ function TypingTest({onScoreUpdate}) {
     setEndMessage("Ran out of time. Press CTRL + R to try again.");
   }
 
+  const switchTheme = (newTheme) => {
+    setTheme(newTheme);
+    Object.entries(themes[newTheme]).forEach(([key, value]) => {
+      document.documentElement.style.setProperty(key, value);
+    });
+    localStorage.setItem('theme', newTheme);
+  };
+
   useKeyPress(async (key) => {
     // deny keypresses in leaderboard component
     if (otherComponentName === "test") {
+      if (key === "b") {
+        setOtherComponentName("leaderboard");
+        scroller.scrollTo("test", {
+          duration: 550,
+          smooth: true,
+        });
+      }
       return;
     }
 
@@ -121,6 +168,13 @@ function TypingTest({onScoreUpdate}) {
       // Keyboard Menu
       if (key === "m") {
         setShowMenu(!showMenu);
+      } else if (key === "b") {
+        if (otherComponentName === "leaderboard") setOtherComponentName("test");
+        else setOtherComponentName("leaderboard");
+        scroller.scrollTo("leaderboard", {
+          duration: 550,
+          smooth: true,
+        });
       } else {
         if (showMenu) {
           switch (key) {
@@ -142,9 +196,18 @@ function TypingTest({onScoreUpdate}) {
             case "l":
               changeSentenceCount(3);
               break;
+            case "z":
+              switchTheme("light");
+              break;
+            case "x":
+              switchTheme("grey");
+              break;
+            case "c":
+              switchTheme("dark");
             default:
               break;
           }
+          return;
         }
       }
     }
@@ -167,7 +230,7 @@ function TypingTest({onScoreUpdate}) {
         }
         setCurrentChar(currentChar.slice(0, -1));
       } else if (key === "Enter" && !invalidInput) { // submit input
-        const res = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/user/${currentChar}`,{
+        const res = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/user/${currentChar}`, {
           headers: {
             'x-api-key': process.env.REACT_APP_WORD_API_KEY
           },
@@ -175,16 +238,16 @@ function TypingTest({onScoreUpdate}) {
         });
         const data = await res.json();
         setTopKey("CTRL+R");
-        if(data.exists){
+        if (data.exists) {
           setTopText("Welcome back, " + currentChar);
           setAccountExists(true);
-        }else{
+        } else {
           setTopText("Thank you for joining " + currentChar);
           setAccountExists(false);
         }
         setUsername(currentChar);
         setStatus(STATES.PASSWORD);
-        
+
         // reset all variables
         setEndMessage("Password:  ");
         setLeftPadding("");
@@ -211,21 +274,21 @@ function TypingTest({onScoreUpdate}) {
         }
         setCurrentChar(currentChar.slice(0, -1));
       } else if (key === "Enter" && !invalidInput) { // submit input
-        if(accountExists){
-          const res = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/user/login`,{
+        if (accountExists) {
+          const res = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/user/login`, {
             method: 'POST',
             headers: {
               'x-api-key': process.env.REACT_APP_WORD_API_KEY,
               'Content-Type': 'application/json'
             },
             credentials: 'include',
-            body: JSON.stringify({username: username, passcode: currentChar})
+            body: JSON.stringify({ username: username, passcode: currentChar })
           });
           const data = await res.json();
-          if(data.loggedIn){
+          if (data.loggedIn) {
             submitScore();
           }
-          else{
+          else {
             setTopText(data.msg);
             setLeftPadding("");
             setRightPadding(new Array(5).fill(" ").join(""));
@@ -233,8 +296,8 @@ function TypingTest({onScoreUpdate}) {
             setCurrentChar("");
             setIncomingChars("");
           }
-        }else{
-          const res = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/user`,{
+        } else {
+          const res = await fetch(`${process.env.REACT_APP_API_ENDPOINT}/user`, {
             method: 'POST',
             headers: {
               'x-api-key': process.env.REACT_APP_WORD_API_KEY,
@@ -378,7 +441,7 @@ function TypingTest({onScoreUpdate}) {
         'Content-Type': 'application/json'
       },
       credentials: 'include',  // Include cookies in the request
-      body: JSON.stringify({ "accuracy": accuracy, "wpm": wpm, "sentencecount": sentenceCount, "timer": milliseconds / 1000,})
+      body: JSON.stringify({ "accuracy": accuracy, "wpm": wpm, "sentencecount": sentenceCount, "timer": milliseconds / 1000, })
     }).then(response => {
       onScoreUpdate();
       setStatus(STATES.SUCCESS);
@@ -413,9 +476,9 @@ function TypingTest({onScoreUpdate}) {
   }
 
   return (
-    <div name="test" className="flex flex-col justify-around items-center h-screen  text-white text-[2vmin] bg-[#0d47a1] gap-4">
+    <div name="test" className="flex flex-col justify-around items-center h-screen text-[2vmin] gap-4">
       {/* Menu */}
-      <div className="section text-white text-[calc(5px_+_2vmin)]">
+      <div className="section text-[calc(5px_+_2vmin)]">
         <div className={
           showMenu === true ? "opacity-100" : "opacity-0"
         }>
@@ -488,12 +551,12 @@ function TypingTest({onScoreUpdate}) {
           </button>
           <Link to={otherComponentName} smooth={true} duration={550} ignoreCancelEvents={true} className={showMenu == null ? "hidden" : null}>
             <button onClick={() => otherComponentName === "leaderboard" ? setOtherComponentName("test") : setOtherComponentName("leaderboard")} disabled={showMenu == null ? true : false}
-              className="fixed z-90 bottom-10 right-8 bg-sky-500 w-[calc(20px_+_4vmin)] h-[calc(20px_+_4vmin)] rounded-full drop-shadow-lg flex justify-center items-center text-white text-[calc(4px_+_3vmin)] hover:bg-blue-600 hover:drop-shadow-2xl duration-500">
+              className="fixed z-90 bottom-10 right-8 w-[calc(20px_+_4vmin)] h-[calc(20px_+_4vmin)] rounded-full drop-shadow-lg flex justify-center items-center text-[calc(4px_+_3vmin)]  hover:drop-shadow-2xl duration-500">
               {otherComponentName === "leaderboard" ?
                 <MdLeaderboard />
                 :
                 <MdKeyboard />
-              }
+              }<div className="ml-1 key text-[20px]">b</div>
             </button>
           </Link>
         </div>
@@ -558,22 +621,93 @@ function TypingTest({onScoreUpdate}) {
         </div>
       </div>
 
-      {/* Typing Test */}
-      <div className="section text-[calc(20px_+_2vmin)] absolute">
-        <div>{endMessage}</div>
-        <p className="whitespace-pre">
-          {/* Everything to the left of current char */}
-          <span className="text-[#ccd6f6]">
-            {(leftPadding + typedChars).slice(-20)}
-          </span>
-          {/* current char */}
-          <span className={
-            invalidInput ? "bg-red-600" : "bg-sky-500"
-          }>{currentChar}</span>
-          {/* Everything to the right of current char */}
-          <span>{incomingChars.substring(0, 20) + rightPadding}</span>
-        </p>
-      </div>
+      {/* Center (Theme/Typing Area) */}
+      {showMenu ? (
+        // Theme Menu
+        <div className="absolute">
+          <div className="section">
+            <div className="text-[calc(1vmin_+_16px)]">Theme</div>
+          </div>
+          <div className="radio">
+            <input
+              type="radio"
+              name="theme"
+              value="light"
+              id="themeLight"
+              className="radio_input"
+              checked={theme === "light"}
+              onChange={() => switchTheme("light")}
+            />
+            <label htmlFor="themeLight" className="radio_label">
+              &nbsp;Light&nbsp;
+            </label>
+            <input
+              type="radio"
+              name="theme"
+              value="dark"
+              id="themeDark"
+              className="radio_input"
+              checked={theme === "grey"}
+              onChange={() => switchTheme("grey")}
+            />
+            <label htmlFor="themeDark" className="radio_label">
+              &nbsp;Grey&nbsp;
+            </label>
+            <input
+              type="radio"
+              name="theme"
+              value="blue"
+              id="themeBlue"
+              className="radio_input"
+              checked={theme === "dark"}
+              onChange={() => switchTheme("dark")}
+            />
+            <label htmlFor="themeBlue" className="radio_label">
+              &nbsp;Dark&nbsp;
+            </label>
+          </div>
+
+          {/* Theme Keys */}
+          <div className="section">
+            <div className="radio_keys">
+              <span className="key">z</span>
+            </div>
+            <div className="w-1/4 radio_keys">
+              <span className="key">x</span>
+            </div>
+            <div className="radio_keys">
+              <span className="key">c</span>
+            </div>
+          </div>
+
+        </div>
+      )
+        : (
+          // Typing Area
+          <div className="section text-[calc(20px_+_2vmin)] absolute">
+            <div>{endMessage}</div>
+            <p className="whitespace-pre">
+              {/* Everything to the left of current char */}
+              <span className="typed-color">
+                {(leftPadding + typedChars).slice(-20)}
+              </span>
+              {/* current char */}
+              <span className={
+                invalidInput ? "incorrectCharColor" : "correctCharColor"
+              }>
+                {status !== STATES.PASSWORD ? (
+                  currentChar
+                ) : (
+                  '*'.repeat(currentChar.length)
+                )
+                }
+              </span>
+
+              {/* Everything to the right of current char */}
+              <span>{incomingChars.substring(0, 20) + rightPadding}</span>
+            </p>
+          </div>
+        )}
 
       {/* Stats */}
       <div className="section text-[calc(6px_+_2vmin)]">
