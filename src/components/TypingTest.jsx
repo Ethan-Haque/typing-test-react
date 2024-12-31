@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import useKeyPress from "../hooks/useKeyPress";
 // import { createOrUpdate } from '../utils/leaderboardAPI';
-import { Link } from 'react-scroll';
+import { Link, scroller } from 'react-scroll';
 import { MdKeyboard, MdLeaderboard } from "react-icons/md";
 
 function TypingTest({ onScoreUpdate }) {
@@ -150,6 +150,13 @@ function TypingTest({ onScoreUpdate }) {
   useKeyPress(async (key) => {
     // deny keypresses in leaderboard component
     if (otherComponentName === "test") {
+      if (key === "b") {
+        setOtherComponentName("leaderboard");
+        scroller.scrollTo("test", {
+          duration: 550,
+          smooth: true,
+        });
+      }
       return;
     }
 
@@ -161,6 +168,13 @@ function TypingTest({ onScoreUpdate }) {
       // Keyboard Menu
       if (key === "m") {
         setShowMenu(!showMenu);
+      } else if (key === "b") {
+        if (otherComponentName === "leaderboard") setOtherComponentName("test");
+        else setOtherComponentName("leaderboard");
+        scroller.scrollTo("leaderboard", {
+          duration: 550,
+          smooth: true,
+        });
       } else {
         if (showMenu) {
           switch (key) {
@@ -182,13 +196,13 @@ function TypingTest({ onScoreUpdate }) {
             case "l":
               changeSentenceCount(3);
               break;
-            case "c":
+            case "z":
               switchTheme("light");
               break;
-            case "v":
+            case "x":
               switchTheme("grey");
               break;
-            case "b":
+            case "c":
               switchTheme("dark");
             default:
               break;
@@ -542,7 +556,7 @@ function TypingTest({ onScoreUpdate }) {
                 <MdLeaderboard />
                 :
                 <MdKeyboard />
-              }
+              }<div className="ml-1 key text-[20px]">b</div>
             </button>
           </Link>
         </div>
@@ -656,13 +670,13 @@ function TypingTest({ onScoreUpdate }) {
           {/* Theme Keys */}
           <div className="section">
             <div className="radio_keys">
-              <span className="key">c</span>
+              <span className="key">z</span>
             </div>
             <div className="w-1/4 radio_keys">
-              <span className="key">v</span>
+              <span className="key">x</span>
             </div>
             <div className="radio_keys">
-              <span className="key">b</span>
+              <span className="key">c</span>
             </div>
           </div>
 
