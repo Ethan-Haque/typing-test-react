@@ -50,11 +50,11 @@ const Leaderboard = ({ refreshTrigger }) => {
     }, [refreshTrigger]);
 
     return (
-        <div name="leaderboard" className="flex justify-center items-center h-screen text-white text-[2vmin] bg-[#0d47a1] ">
+        <div name="leaderboard" className="flex justify-center items-center h-screen text-[2vmin] ">
             <div className="h-[80%]">
                 <div>
                     <table className="table-fixed text-left">
-                        <thead className="sticky top-0 bg-[#0d47a1] block ">
+                        <thead className="sticky top-0 block">
                             <tr >
                                 <th className="px-6 py-4 w-[20vw]">Name</th>
                                 <th className="px-6 py-4 w-[20vw]">WPM</th>
