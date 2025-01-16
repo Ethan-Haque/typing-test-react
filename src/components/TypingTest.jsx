@@ -169,12 +169,7 @@ function TypingTest({ onScoreUpdate }) {
       if (key === "m") {
         setShowMenu(!showMenu);
       } else if (key === "r") {
-        if (otherComponentName === "leaderboard") setOtherComponentName("test");
-        else setOtherComponentName("leaderboard");
-        scroller.scrollTo("leaderboard", {
-          duration: 550,
-          smooth: true,
-        });
+        switchPage();
       } else {
         if (showMenu) {
           switch (key) {
@@ -209,6 +204,10 @@ function TypingTest({ onScoreUpdate }) {
           }
           return;
         }
+      }
+    } else if (status === STATES.SUCCESS || status === STATES.FAIL) {
+      if (key === "r") {
+        switchPage();
       }
     }
 
@@ -432,6 +431,14 @@ function TypingTest({ onScoreUpdate }) {
     }
   });
 
+  function switchPage() {
+    if (otherComponentName === "leaderboard") setOtherComponentName("test");
+    else setOtherComponentName("leaderboard");
+    scroller.scrollTo("leaderboard", {
+      duration: 550,
+      smooth: true,
+    });
+  }
   // submit score and set vars
   function submitScore() {
     fetch(`${process.env.REACT_APP_API_ENDPOINT}/score`, {
