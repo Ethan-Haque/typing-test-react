@@ -150,7 +150,7 @@ function TypingTest({ onScoreUpdate }) {
   useKeyPress(async (key) => {
     // deny keypresses in leaderboard component
     if (otherComponentName === "test") {
-      if (key === "b") {
+      if (key === "r") {
         setOtherComponentName("leaderboard");
         scroller.scrollTo("test", {
           duration: 550,
@@ -168,7 +168,7 @@ function TypingTest({ onScoreUpdate }) {
       // Keyboard Menu
       if (key === "m") {
         setShowMenu(!showMenu);
-      } else if (key === "b") {
+      } else if (key === "r") {
         if (otherComponentName === "leaderboard") setOtherComponentName("test");
         else setOtherComponentName("leaderboard");
         scroller.scrollTo("leaderboard", {
@@ -556,7 +556,7 @@ function TypingTest({ onScoreUpdate }) {
                 <MdLeaderboard />
                 :
                 <MdKeyboard />
-              }<div className="ml-1 key text-[20px]">b</div>
+              }<div className="ml-1 key text-[20px]">r</div>
             </button>
           </Link>
         </div>
