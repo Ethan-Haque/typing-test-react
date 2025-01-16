@@ -3,7 +3,7 @@
 </h1>
 
 <h3 align="center">
-	<b>Live:</b> type.ethanhaque.ca<br>
+	<b>Live:</b> https://type.ethanhaque.ca/<br>
 	<b>1.0 Serverless:</b> https://eh-type.netlify.app/<br>
 	<b>Backend:</b> https://github.com/Ethan-Haque/words-api
 </h4>
