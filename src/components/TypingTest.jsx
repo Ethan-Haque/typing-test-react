@@ -150,7 +150,7 @@ function TypingTest({ onScoreUpdate }) {
   useKeyPress(async (key) => {
     // deny keypresses in leaderboard component
     if (otherComponentName === "test") {
-      if (key === "b") {
+      if (key === "r") {
         setOtherComponentName("leaderboard");
         scroller.scrollTo("test", {
           duration: 550,
@@ -168,13 +168,8 @@ function TypingTest({ onScoreUpdate }) {
       // Keyboard Menu
       if (key === "m") {
         setShowMenu(!showMenu);
-      } else if (key === "b") {
-        if (otherComponentName === "leaderboard") setOtherComponentName("test");
-        else setOtherComponentName("leaderboard");
-        scroller.scrollTo("leaderboard", {
-          duration: 550,
-          smooth: true,
-        });
+      } else if (key === "r") {
+        switchPage();
       } else {
         if (showMenu) {
           switch (key) {
@@ -209,6 +204,10 @@ function TypingTest({ onScoreUpdate }) {
           }
           return;
         }
+      }
+    } else if (status === STATES.SUCCESS || status === STATES.FAIL) {
+      if (key === "r") {
+        switchPage();
       }
     }
 
@@ -432,6 +431,14 @@ function TypingTest({ onScoreUpdate }) {
     }
   });
 
+  function switchPage() {
+    if (otherComponentName === "leaderboard") setOtherComponentName("test");
+    else setOtherComponentName("leaderboard");
+    scroller.scrollTo("leaderboard", {
+      duration: 550,
+      smooth: true,
+    });
+  }
   // submit score and set vars
   function submitScore() {
     fetch(`${process.env.REACT_APP_API_ENDPOINT}/score`, {
@@ -556,7 +563,7 @@ function TypingTest({ onScoreUpdate }) {
                 <MdLeaderboard />
                 :
                 <MdKeyboard />
-              }<div className="ml-1 key text-[20px]">b</div>
+              }<div className="ml-1 key text-[20px]">r</div>
             </button>
           </Link>
         </div>
