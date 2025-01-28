@@ -84,6 +84,7 @@ function TypingTest({ onScoreUpdate }) {
 
   useEffect(() => {
     document.body.style.overflow = "hidden"; // remove user scrolling
+    window.history.scrollRestoration = 'manual'; // points view to top
 
     // set local values
     const storedTheme = localStorage.getItem('theme');
