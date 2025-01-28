@@ -85,13 +85,15 @@ function TypingTest({ onScoreUpdate }) {
   useEffect(() => {
     document.body.style.overflow = "hidden"; // remove user scrolling
 
-    //set local values
+    // set local values
     const storedTheme = localStorage.getItem('theme');
     const storedMilliseconds = localStorage.getItem('milliseconds');
     const storedSentenceCount = localStorage.getItem('sentenceCount');
 
     if (storedTheme) {
       switchTheme(storedTheme);
+    } else {
+      switchTheme('grey'); // default theme
     }
     if (storedMilliseconds) {
       setMilliseconds(JSON.parse(storedMilliseconds));
